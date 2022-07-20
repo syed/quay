@@ -480,6 +480,7 @@ class User(ApiResource):
 
     @show_if(features.USER_CREATION)
     @show_if(features.DIRECT_LOGIN)
+    @require_user_admin
     @nickname("createNewUser")
     @internal_only
     @validate_json_request("NewUser")
@@ -516,13 +517,15 @@ class User(ApiResource):
 
         # If recaptcha is enabled, then verify the user is a human.
         if features.RECAPTCHA:
-            recaptcha_response = user_data.get("recaptcha_response", "")
-            result = recaptcha2.verify(
-                app.config["RECAPTCHA_SECRET_KEY"], recaptcha_response, get_request_ip()
-            )
+            # check if the user is whitelisted to bypass recaptcha security check
+            if get_authenticated_user().username not in features.RECAPTCHA_WHITELIST_USERS:
+                recaptcha_response = user_data.get("recaptcha_response", "")
+                result = recaptcha2.verify(
+                    app.config["RECAPTCHA_SECRET_KEY"], recaptcha_response, get_request_ip()
+                )
 
-            if not result["success"]:
-                return {"message": "Are you a bot? If not, please revalidate the captcha."}, 400
+                if not result["success"]:
+                    return {"message": "Are you a bot? If not, please revalidate the captcha."}, 400
 
         is_possible_abuser = ip_resolver.is_ip_possible_threat(get_request_ip())
         try:

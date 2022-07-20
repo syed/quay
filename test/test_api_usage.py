@@ -814,6 +814,11 @@ class TestCreateNewUser(ApiTestCase):
                 details["recaptcha_response"] = "somecode"
                 self.postResponse(User, data=details, expected_code=200)
 
+    def test_recaptcha_whitelist_users(self):
+        with (self.toggleFeature("RECAPTCHA", True)):
+            app.config["RECAPTCHA_WHITELIST_USERS"] = ["bobby"]
+            self.postResponse(User, data=NEW_USER_DETAILS, expected_code=201)
+
     def test_createuser_withteaminvite(self):
         inviter = model.user.get_user(ADMIN_ACCESS_USER)
         team = model.team.get_organization_team(ORGANIZATION, "owners")
