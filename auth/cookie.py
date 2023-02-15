@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 from uuid import UUID
 from flask_login import current_user
@@ -12,7 +13,10 @@ def validate_session_cookie(auth_header_unusued=None):
     """
     Attempts to load a user from a session cookie.
     """
+    print("************* VALIDATING SESSION COOKIE ***************")
+    traceback.print_stack()
     if current_user.is_anonymous:
+        print("************* CURRENT USER ANON ***************")
         return ValidateResult(AuthKind.cookie, missing=True)
 
     try:
