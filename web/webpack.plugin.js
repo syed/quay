@@ -27,6 +27,7 @@ const pluginSharedModules = {
   '@patternfly/react-table': {},
   react: { singleton: true, import: false },
   'react-dom': { singleton: true, import: false },
+  'react-router-dom': { singleton: true, import: false },
 };
 
 const plugins = [
@@ -103,26 +104,14 @@ module.exports = {
       {
         test: /\.svg$/,
         include: (input) => input.indexOf('background-filter.svg') > 1,
-        use: [
-          {
-            loader: 'url-loader',
-            options: {
-              limit: 5000,
-              outputPath: 'svgs',
-              name: '[name].[ext]',
-            },
-          },
-        ],
+        type: 'asset',
       },
       {
         test: /\.svg$/,
         // only process SVG modules with this loader if they live under a 'bgimages' directory
         // this is primarily useful when applying a CSS background using an SVG
         include: (input) => input.indexOf(BG_IMAGES_DIRNAME) > -1,
-        use: {
-          loader: 'svg-url-loader',
-          options: {},
-        },
+        type: "asset/inline"
       },
       {
         test: /\.svg$/i,
@@ -133,10 +122,7 @@ module.exports = {
           input.indexOf('fonts') === -1 &&
           input.indexOf('background-filter') === -1 &&
           input.indexOf('pficon') === -1,
-        use: {
-          loader: 'file-loader',
-          options: {},
-        },
+        type: "asset/resource"
       },
       {
         test: /\.(jpg|jpeg|png|gif)$/i,
@@ -167,16 +153,7 @@ module.exports = {
             'node_modules/@patternfly/react-inline-edit-extension/node_modules/@patternfly/react-styles/css/assets/images',
           ),
         ],
-        use: [
-          {
-            loader: 'url-loader',
-            options: {
-              limit: 5000,
-              outputPath: 'images',
-              name: '[name].[ext]',
-            },
-          },
-        ],
+        type: 'asset',
       },
       {
         test: /\.s[ac]ss$/i,

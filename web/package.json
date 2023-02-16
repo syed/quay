@@ -4,8 +4,6 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
-    "@openshift-console/dynamic-plugin-sdk": "^0.0.18",
-    "@openshift/dynamic-plugin-sdk-webpack": "^2.0.0",
     "@patternfly/patternfly": "^4.185.1",
     "@patternfly/react-charts": "^6.74.3",
     "@patternfly/react-core": "^4.202.16",
@@ -83,6 +81,7 @@
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.0",
     "lint-staged": ">=10",
+    "@openshift/dynamic-plugin-sdk-webpack": "^2.0.0",
     "prettier": "^2.1.2",
     "raw-loader": "^4.0.2",
     "react-docgen-typescript-loader": "^3.7.2",
