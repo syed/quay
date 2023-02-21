@@ -1,9 +1,6 @@
 {
   "name": "quay-ui-plugin",
   "version": "0.0.1",
-  "dependencies": {
-    "quay-ui": "^0.1.0"
-  },
   "exposedModules": {
     "QuayPluginMain": "./src/routes/PluginMain"
   }

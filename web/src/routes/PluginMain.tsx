@@ -1,6 +1,8 @@
 import {Banner, Flex, FlexItem, Page} from '@patternfly/react-core';
 
 import {Navigate, Outlet, Route, Routes} from 'react-router-dom';
+import {RecoilRoot} from 'recoil';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 
 import {NavigationPath} from './NavigationPath';
 import OrganizationsList from './OrganizationsList/OrganizationsList';
@@ -8,7 +10,7 @@ import Organization from './OrganizationsList/Organization/Organization';
 import RepositoryDetails from 'src/routes/RepositoryDetails/RepositoryDetails';
 import RepositoriesList from './RepositoriesList/RepositoriesList';
 import TagDetails from 'src/routes/TagDetails/TagDetails';
-import {useEffect} from 'react';
+import {useEffect, useMemo} from 'react';
 import ErrorBoundary from 'src/components/errors/ErrorBoundary';
 import {useQuayConfig} from 'src/hooks/UseQuayConfig';
 import SiteUnavailableError from 'src/components/errors/SiteUnavailableError';
@@ -39,7 +41,7 @@ const NavigationRoutes = [
   },
 ];
 
-export default function PluginMain() {
+function PluginMain() {
   const quayConfig = useQuayConfig();
   const {loading, error} = useCurrentUser();
 
@@ -52,11 +54,10 @@ export default function PluginMain() {
   if (loading) {
     return null;
   }
+
   return (
     <ErrorBoundary hasError={!!error} fallback={<SiteUnavailableError />}>
-      <Page
-        style={{height: '100vh'}}
-      >
+      <Page style={{height: '100vh'}}>
         <Banner variant="info">
           <Flex
             spaceItems={{default: 'spaceItemsSm'}}
@@ -88,5 +89,28 @@ export default function PluginMain() {
         <Outlet />
       </Page>
     </ErrorBoundary>
+  );
+}
+
+// Wraps the plugin with necessary context providers
+export default function PluginMainRoot() {
+  // initialize the client only on itial render
+  const queryClient = useMemo(() => {
+    return new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+          refetchOnWindowFocus: false,
+        },
+      },
+    });
+  }, []);
+
+  return (
+    <RecoilRoot>
+      <QueryClientProvider client={queryClient}>
+        <PluginMain />
+      </QueryClientProvider>
+    </RecoilRoot>
   );
 }
