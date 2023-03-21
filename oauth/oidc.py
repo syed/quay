@@ -17,7 +17,7 @@ from oauth.base import (
     OAuthEndpoint,
 )
 from oauth.login import OAuthLoginException
-from oauth.login_utils import get_username_email_from_token
+from oauth.login_utils import get_sub_username_email_from_token
 from util.security.jwtutil import decode, InvalidTokenError
 
 logger = logging.getLogger(__name__)
@@ -183,7 +183,7 @@ class OIDCLoginService(OAuthService):
         else:
             user_info = decoded_id_token
 
-        return get_username_email_from_token(decoded_id_token, user_info, self.config, self._mailing)
+        return get_sub_username_email_from_token(decoded_id_token, user_info, self.config, self._mailing)
 
     @property
     def _issuer(self):

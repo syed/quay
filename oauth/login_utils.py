@@ -45,7 +45,7 @@ def get_jwt_issuer(token):
     return payload.get('iss', None)
 
 
-def get_username_email_from_token(decoded_id_token, user_info=None, config={}, mailing=False):
+def get_sub_username_email_from_token(decoded_id_token, user_info=None, config={}, mailing=False):
     if not user_info:
         user_info = decoded_id_token
 
@@ -201,7 +201,6 @@ def _conduct_oauth_login(
 
         requires_password = auth_system.requires_distinct_cli_password
         prompts = model.user.get_default_user_prompts(features)
-        print("********* CREATE FEDEREATED USER ***************")
         user_obj = model.user.create_federated_user(
             new_username,
             lemail,

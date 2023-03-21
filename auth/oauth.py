@@ -8,7 +8,7 @@ from auth.scopes import scopes_from_scope_string
 from auth.validateresult import AuthKind, ValidateResult
 from data import model
 from oauth.login import OAuthLoginException
-from oauth.login_utils import is_jwt, get_username_email_from_token, _conduct_oauth_login, get_jwt_issuer
+from oauth.login_utils import is_jwt, get_sub_username_email_from_token, _conduct_oauth_login, get_jwt_issuer
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,6 @@ def validate_oauth_token(token):
 def validate_sso_oauth_token(token):
     issuer = get_jwt_issuer(token)
     service = oauth_login.get_service_by_issuer(issuer)
-    print(f'************ ISSUER {issuer} SERVICE {service} ******************')
     if not service:
         return ValidateResult(
             AuthKind.ssojwt, error_message=f"Issuer {issuer} not configured"
@@ -49,7 +48,7 @@ def validate_sso_oauth_token(token):
     try:
         # for client side oauth, the audience will be the client side oauth client
         decoded_id_token = service.decode_user_jwt(token, options={'verify_aud': False, 'verify_nbf': False})
-        sub, lusername, lemail = get_username_email_from_token(decoded_id_token, None, service.config, False)
+        sub, lusername, lemail = get_sub_username_email_from_token(decoded_id_token, None, service.config, False)
 
         login_result = _conduct_oauth_login(app=app,
                                             analytics=analytics,
@@ -60,7 +59,7 @@ def validate_sso_oauth_token(token):
                                             lemail=lemail,
                                             captcha_verified=True)
         if login_result.error_message:
-            print(f"****** AUTH ERROR {login_result.error_message} **********")
+            logger.error(f"Error logging in {login_result.error_message}")
             return ValidateResult(AuthKind.ssojwt, error_message=login_result.error_message)
 
         return ValidateResult(AuthKind.ssojwt, user=login_result.user_obj)
@@ -76,7 +75,6 @@ def validate_app_oauth_token(token):
     """
     Validates the specified OAuth token, returning whether it points to a valid OAuth token.
     """
-    print("********* VALIDATE OAUTH TOKEN **********", token)
     validated = model.oauth.validate_access_token(token)
     if not validated:
         logger.warning("OAuth access token could not be validated: %s", token)
