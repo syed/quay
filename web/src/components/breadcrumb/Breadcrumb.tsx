@@ -47,10 +47,12 @@ export function QuayBreadcrumb() {
   };
 
   const buildFromRoute = () => {
+    console.log('buildFromRoute');
     const result = [];
     const history = [];
     let prevItem = null;
 
+    console.log('routerBreadcrumbs', routerBreadcrumbs);
     for (let i = 0; i < routerBreadcrumbs.length; i++) {
       const newObj = {};
       const object = routerBreadcrumbs[i];
@@ -71,12 +73,13 @@ export function QuayBreadcrumb() {
         history.push(prevObj);
         prevItem = null;
       }
-
+      console.log('newObj2', newObj);
       result.push(newObj);
       history.push(newObj);
     }
 
     // If prevItem was not pushed in the for loop
+    console.log('prevItem2', prevItem);
     if (prevItem) {
       const prevObj = buildBreadCrumbFromPrevRoute(prevItem);
       result.push(prevObj);
@@ -89,8 +92,10 @@ export function QuayBreadcrumb() {
   };
 
   const currentBreadcrumbItem = () => {
+    console.log('currentBreadcrumbItem');
     const newItem = {};
     const lastItem = routerBreadcrumbs[routerBreadcrumbs.length - 1];
+    console.log('lastItem3', lastItem);
 
     newItem['pathname'] = lastItem.location.pathname;
     // Form QuayBreadcrumbItem for the current path
@@ -101,13 +106,16 @@ export function QuayBreadcrumb() {
     }
 
     newItem['active'] = true;
+    console.log('newItem3', newItem);
     return newItem;
   };
 
   const buildFromBrowserHistory = () => {
+    console.log('build from browser history', browserHistory);
     const result = [];
     const history = [];
     const newItem = currentBreadcrumbItem();
+    console.log('newItem', newItem);
 
     for (const value of Array.from(browserHistory.values())) {
       const newObj = {};
@@ -123,9 +131,12 @@ export function QuayBreadcrumb() {
         newItem['title'] = newObj['title'];
         break;
       }
+      console.log('newObj', newObj);
       result.push(newObj);
       history.push(newObj);
     }
+
+    console.log('newItem', newItem);
     result.push(newItem);
     history.push(newItem);
     setBreadcrumbItems(result);
@@ -135,6 +146,7 @@ export function QuayBreadcrumb() {
   useEffect(() => {
     // urlParams has atleast one item - {*: 'endpoint'}
     // If size = 1, no params are defined in the url, so we reset breadcrumb history
+    console.log('urlParams', urlParams);
     if (Object.keys(urlParams).length <= 1) {
       resetBreadCrumbs();
       return;
