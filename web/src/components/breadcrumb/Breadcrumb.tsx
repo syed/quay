@@ -159,6 +159,9 @@ export function QuayBreadcrumb() {
     }
   }, []);
 
+  const matches = useMatches();
+  console.log('new router matches', matches);
+
   return (
     <div>
       {breadcrumbItems.length > 0 ? (
