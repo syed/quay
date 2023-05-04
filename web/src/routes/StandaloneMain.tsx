@@ -4,7 +4,7 @@ import {Navigate, Outlet, Route, Routes} from 'react-router-dom';
 
 import {QuayHeader} from 'src/components/header/QuayHeader';
 import {QuaySidebar} from 'src/components/sidebar/QuaySidebar';
-import {NavigationPath, NavigationRoutes} from './NavigationPath';
+import {NavigationPath} from './NavigationPath';
 import OrganizationsList from './OrganizationsList/OrganizationsList';
 import Organization from './OrganizationsList/Organization/Organization';
 import RepositoryDetails from 'src/routes/RepositoryDetails/RepositoryDetails';
@@ -19,6 +19,29 @@ import {useCurrentUser} from 'src/hooks/UseCurrentUser';
 import {InfoCircleIcon} from '@patternfly/react-icons';
 import axios from 'axios';
 import axiosIns from 'src/libs/axios';
+
+const NavigationRoutes = [
+  {
+    path: NavigationPath.organizationsList,
+    Component: <OrganizationsList />,
+  },
+  {
+    path: NavigationPath.organizationDetail,
+    Component: <Organization />,
+  },
+  {
+    path: NavigationPath.repositoriesList,
+    Component: <RepositoriesList organizationName={null} />,
+  },
+  {
+    path: NavigationPath.repositoryDetail,
+    Component: <RepositoryDetails />,
+  },
+  {
+    path: NavigationPath.tagDetail,
+    Component: <TagDetails />,
+  },
+];
 
 export function StandaloneMain() {
   axios.defaults.baseURL =

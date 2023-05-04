@@ -6,7 +6,7 @@ import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 
 import useChrome from '@redhat-cloud-services/frontend-components/useChrome';
 
-import {NavigationPath, NavigationRoutes} from './NavigationPath';
+import {NavigationPath} from './NavigationPath';
 import OrganizationsList from './OrganizationsList/OrganizationsList';
 import Organization from './OrganizationsList/Organization/Organization';
 import RepositoryDetails from 'src/routes/RepositoryDetails/RepositoryDetails';
@@ -23,6 +23,30 @@ import {CreateNewUser} from 'src/components/modals/CreateNewUser';
 import NewUserEmptyPage from 'src/components/NewUserEmptyPage';
 import axios from 'axios';
 import axiosIns from 'src/libs/axios';
+
+
+const NavigationRoutes = [
+  {
+    path: NavigationPath.organizationsList,
+    Component: <OrganizationsList />,
+  },
+  {
+    path: NavigationPath.organizationDetail,
+    Component: <Organization />,
+  },
+  {
+    path: NavigationPath.repositoriesList,
+    Component: <RepositoriesList organizationName={null} />,
+  },
+  {
+    path: NavigationPath.repositoryDetail,
+    Component: <RepositoryDetails />,
+  },
+  {
+    path: NavigationPath.tagDetail,
+    Component: <TagDetails />,
+  },
+];
 
 function PluginMain() {
   const chrome = useChrome();
@@ -56,7 +80,7 @@ function PluginMain() {
 
   useEffect(() => {
     setIsPluginState(true);
-    if (user?.prompts && user.prompts.includes('confirm_username')) {
+    if (user?.prompts && user.prompts.includes("confirm_username")) {
       setConfirmUserModalOpen(true);
     }
   }, [user]);
@@ -67,10 +91,10 @@ function PluginMain() {
 
   return (
     <Page style={{height: '100vh'}}>
-      <CreateNewUser
-        user={user}
-        isModalOpen={isConfirmUserModalOpen}
-        setModalOpen={setConfirmUserModalOpen}
+    <CreateNewUser
+      user={user}
+      isModalOpen={isConfirmUserModalOpen}
+      setModalOpen={setConfirmUserModalOpen}
       />
       <Banner variant="info">
         <Flex
@@ -94,7 +118,9 @@ function PluginMain() {
         </Flex>
       </Banner>
       {user?.prompts && user.prompts.includes('confirm_username') ? (
-        <NewUserEmptyPage setCreateUserModalOpen={setConfirmUserModalOpen} />
+        <NewUserEmptyPage
+          setCreateUserModalOpen={setConfirmUserModalOpen}
+        />
       ) : (
         <Routes>
           <Route index element={<Navigate to="organization" replace />} />
