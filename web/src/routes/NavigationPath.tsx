@@ -95,7 +95,7 @@ function domainRoute(currentRoute, definedRoute) {
 
 const currentRoute = window.location.pathname;
 
-const NavigationRoutes = [
+export const NavigationRoutes = [
   {
     path: domainRoute(currentRoute, NavigationPath.organizationsList),
     Component: <OrganizationsList />,
@@ -122,4 +122,3 @@ const NavigationRoutes = [
     breadcrumb: Breadcrumb.tagDetailBreadcrumb,
   },
 ];
-export {NavigationRoutes};

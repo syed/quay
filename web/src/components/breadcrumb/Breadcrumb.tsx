@@ -24,6 +24,7 @@ export function QuayBreadcrumb() {
     excludePaths: ['/'],
   });
   const urlParams = useParams();
+  const location = useLocation();
 
   const resetBreadCrumbs = () => {
     setBreadcrumbItems([]);
@@ -41,7 +42,7 @@ export function QuayBreadcrumb() {
     prevObj['pathname'] = object.match.pathname;
     prevObj['title'] = fetchRepoName(prevObj['pathname']);
     prevObj['active'] =
-      prevObj['pathname'].localeCompare(window.location.pathname) === 0;
+      prevObj['pathname'].localeCompare(location.pathname) === 0;
     return prevObj;
   };
 
@@ -62,7 +63,7 @@ export function QuayBreadcrumb() {
         newObj['title'] = object.match.pathname.split('/').slice(-1)[0];
       }
       newObj['active'] =
-        object.match.pathname.localeCompare(window.location.pathname) === 0;
+        object.match.pathname.localeCompare(location.pathname) === 0;
 
       if (prevItem) {
         const prevObj = buildBreadCrumbFromPrevRoute(prevItem);
@@ -117,7 +118,7 @@ export function QuayBreadcrumb() {
         newObj['title'] = value['title']['props']['children'];
       }
       newObj['active'] =
-        value['pathname'].localeCompare(window.location.pathname) === 0;
+        value['pathname'].localeCompare(location.pathname) === 0;
       if (newItem['pathname'] == newObj['pathname']) {
         newItem['title'] = newObj['title'];
         break;
@@ -167,7 +168,7 @@ export function QuayBreadcrumb() {
           </Breadcrumb>
         </PageBreadcrumb>
       ) : (
-        ''
+        'test'
       )}
     </div>
   );
