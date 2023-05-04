@@ -21,7 +21,7 @@ export function QuayBreadcrumb() {
   );
   const routerBreadcrumbs: BreadcrumbData[] = useBreadcrumbs(NavigationRoutes, {
     disableDefaults: true,
-    excludePaths: ['/'],
+    excludePaths: ['/', '/beta/', '/preview/'],
   });
   const urlParams = useParams();
   const location = useLocation();
