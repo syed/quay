@@ -140,6 +140,7 @@ class _CloudStorage(BaseStorageV2):
     def _initialize_cloud_conn(self):
         if not self._initialized:
             # Low-level client. Needed to generate presigned urls
+            print(f"******** CONNECT ARGS ******** {self._connect_kwargs}")
             self._cloud_conn = self._session.client("s3", **self._connect_kwargs)
             self._cloud_bucket = self._session.resource("s3", **self._connect_kwargs).Bucket(
                 self._bucket_name
