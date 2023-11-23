@@ -421,7 +421,6 @@ def _print_env():
     logger.warning(__name__)
     logger.warning(__file__)
     logger.warning(__package__)
-    logger.warning(__path__)
     logger.warning("******")
 
 def _db_from_url(
