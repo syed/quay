@@ -428,6 +428,12 @@ def _print_env():
     logger.warning(p.exe())
     logger.warning("******")
 
+def _get_worker_user():
+    import psutil
+    p = psutil.Process(os.getpid())
+    cmdline = p.cmdline()
+    return cmdline[-1] if cmdline else ''
+
 def _db_from_url(
     url,
     db_kwargs,
@@ -444,7 +450,7 @@ def _db_from_url(
     if parsed_url.port:
         db_kwargs["port"] = parsed_url.port
     if parsed_url.username:
-        db_kwargs["user"] = parsed_url.username
+        db_kwargs["user"] = parsed_url.username + '_' + _get_worker_user()
     if parsed_url.password:
         db_kwargs["password"] = parsed_url.password
 
