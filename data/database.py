@@ -437,7 +437,7 @@ def _get_worker_user():
         if i in ''.join(cmdline):
             return ''
 
-    return cmdline[-1] if cmdline else ''
+    return '_' + cmdline[-1] if cmdline else ''
 
 def _db_from_url(
     url,
