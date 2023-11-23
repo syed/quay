@@ -486,6 +486,7 @@ def _db_from_url(
         driver_autocommit = db_kwargs["_driver_autocommit"]
         db_kwargs.pop("_driver_autocommit", None)
 
+    logger.warning("DB connection args: %s", db_kwargs)
     created = driver(parsed_url.database, **db_kwargs)
     if driver_autocommit:
         created.connect_params["autocommit"] = driver_autocommit
