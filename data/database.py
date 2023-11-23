@@ -437,7 +437,7 @@ def _db_from_url(
     if parsed_url.port:
         db_kwargs["port"] = parsed_url.port
     if parsed_url.username:
-        db_kwargs["user"] = parsed_url.username +
+        db_kwargs["user"] = parsed_url.username
     if parsed_url.password:
         db_kwargs["password"] = parsed_url.password
 
