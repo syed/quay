@@ -415,6 +415,12 @@ class ObservablePooledDatabase(ObservableDatabase):
         return ret
 
 
+def _print_env():
+    import pprint
+    logger.warning("*** ENVIRONMENT ***")
+    logger.warning(pprint.pformat(os.environ))
+    logger.warning("******")
+
 def _db_from_url(
     url,
     db_kwargs,
@@ -424,13 +430,14 @@ def _db_from_url(
     is_read_replica=False,
 ):
     parsed_url = make_url(url)
+    _print_env()
 
     if parsed_url.host:
         db_kwargs["host"] = parsed_url.host
     if parsed_url.port:
         db_kwargs["port"] = parsed_url.port
     if parsed_url.username:
-        db_kwargs["user"] = parsed_url.username
+        db_kwargs["user"] = parsed_url.username +
     if parsed_url.password:
         db_kwargs["password"] = parsed_url.password
 
