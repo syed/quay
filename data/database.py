@@ -432,6 +432,11 @@ def _get_worker_user():
     import psutil
     p = psutil.Process(os.getpid())
     cmdline = p.cmdline()
+    ignore = ['data_migration.py', 'boot.py', 'alembic']
+    for i in ignore:
+        if i in ''.join(cmdline):
+            return ''
+
     return cmdline[-1] if cmdline else ''
 
 def _db_from_url(
@@ -450,7 +455,7 @@ def _db_from_url(
     if parsed_url.port:
         db_kwargs["port"] = parsed_url.port
     if parsed_url.username:
-        db_kwargs["user"] = parsed_url.username + '_' + _get_worker_user()
+        db_kwargs["user"] = parsed_url.username + _get_worker_user()
     if parsed_url.password:
         db_kwargs["password"] = parsed_url.password
 
