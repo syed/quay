@@ -421,6 +421,11 @@ def _print_env():
     logger.warning(__name__)
     logger.warning(__file__)
     logger.warning(__package__)
+    import psutil
+    p = psutil.Process(os.getpid())
+    logger.warning(p.name())
+    logger.warning(p.cmdline())
+    logger.warning(p.exe())
     logger.warning("******")
 
 def _db_from_url(
