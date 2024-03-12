@@ -1,5 +1,6 @@
 from flask import Blueprint, request, session, jsonify
 
+from auth.credentials import validate_credentials
 from auth.decorators import process_basic_auth
 from util.cache import no_cache
 
@@ -17,11 +18,10 @@ def login_hostname():
         Example request data:
         {"hostname":"syahmed-mac"}
     """
-    return jsonify({'error': 'validation method not found'}), 404
+    return jsonify({'error': 'validation method not supported'}), 401
 
 
 @bp.route('/-/user/<user_id>', methods=['PUT'])
-@process_basic_auth
 @no_cache
 def login_user(user_id):
     """
@@ -51,6 +51,8 @@ def login_user(user_id):
 
     if not username or not password:
         return jsonify({'error': 'Invalid username or password'}), 401
+
+    result = validate_credentials(username, password)
 
     return jsonify({'ok': 'You have been authenticated', 'token': 'randomtoken'}), 201
 
