@@ -516,6 +516,7 @@ def configure(config_object, testing=False):
                 ro_config["DB_URI"],
                 ro_config.get("DB_CONNECTION_ARGS", db_kwargs),
                 is_read_replica=True,
+                allow_pooling=ro_config.get("DB_CONNECTION_POOLING", True),
             )
             for ro_config in read_replicas
         ]

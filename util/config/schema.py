@@ -270,6 +270,10 @@ CONFIG_SCHEMA = {
             },
             "required": ["threadlocals", "autorollback"],
         },
+        "DB_CONNECTION_POOLING": {
+            "type": "boolean",
+            "description": "Allow connection pooling",
+        },
         "ALLOW_PULLS_WITHOUT_STRICT_LOGGING": {
             "type": "boolean",
             "description": "If true, pulls in which the pull audit log entry cannot be written will "

@@ -2,8 +2,8 @@ import importlib
 import pkgutil
 
 from flask import Blueprint
-from artifactplugins import plugins
-from artifactplugins.plugin import BaseArtifactPlugin
+from artifacts import plugins
+from artifacts.plugin import BaseArtifactPlugin
 import sys
 import logging
 

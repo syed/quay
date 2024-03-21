@@ -9,7 +9,7 @@ from endpoints.realtime import realtime
 from endpoints.web import web
 from endpoints.webhooks import webhooks
 from endpoints.wellknown import wellknown
-from artifactplugins import init_plugins
+from artifacts import init_plugins
 
 application.register_blueprint(web)
 application.register_blueprint(githubtrigger, url_prefix="/oauth2")
