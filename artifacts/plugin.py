@@ -6,9 +6,6 @@ class BaseArtifactPlugin(object):
     def register_routes(self, app):
         raise NotImplementedError("You must implement the init_routes method")
 
-    def run_db_migrations(self, db_url: str):
-        raise NotImplementedError("You must implement the init_db method")
-
     def register_workers(self):
         raise NotImplementedError("You must implement the init_workers method")
 

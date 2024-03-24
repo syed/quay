@@ -17,7 +17,7 @@ class NpmPlugin(BaseArtifactPlugin):
         super().__init__(name)
 
     def register_routes(self, app):
-        logger.info(f"Registering routes for {PLUGIN_NAME}")
+        logger.info(f"🔴🔴🔴🔴🔴🔴🔴🔴 Registering routes for {PLUGIN_NAME}")
         app.register_blueprint(npm_bp, url_prefix="/npm")
 
     def register_workers(self):

@@ -18,12 +18,18 @@ depends_on = None
 
 def upgrade():
     op.create_table(
-        "npmpackage",
+        "npmtoken",
         sa.Column("id", sa.Integer, nullable=False),
-        sa.Column("name", sa.String, nullable=False),
-        sa.Column("version", sa.String, nullable=False),
+        sa.Column("token_key", sa.String, nullable=False),
+        sa.Column("token_name", sa.String, nullable=False),
+        sa.Column("read_only", sa.Boolean),
+        sa.Column("created_at", sa.DateTime, nullable=False),
+        sa.Column("updated_at", sa.DateTime),
+        sa.Column("cidr_whitelist", sa.ARRAY(sa.String)),
+        sa.Column("user_id", sa.Integer, sa.ForeignKey("user.id")),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_npmtoken")),
     )
 
 
 def downgrade():
-    op.drop_table("npmpackage")
+    op.drop_table("npm_token")

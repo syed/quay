@@ -32,7 +32,6 @@ def init_plugins(application):
 
     discovered_plugins = discover_plugins()
     for plugin_obj in discovered_plugins.values():
-        plugin_obj.run_db_migrations(application.config.get('DB_URI'))
         plugin_obj.register_routes(plugins_bp)
 
     application.register_blueprint(plugins_bp, url_prefix='/artifacts')
