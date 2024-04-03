@@ -5,7 +5,7 @@ from hashlib import sha512
 from peewee import CharField, BooleanField, DateTimeField
 from playhouse.postgres_ext import ArrayField
 
-from data.database import BaseModel, QuayUserField
+from data.database import BaseModel, QuayUserField, db_transaction, User
 
 
 class NpmToken(BaseModel):
@@ -18,10 +18,12 @@ class NpmToken(BaseModel):
     user = QuayUserField(allows_robots=False)
 
 
-def create_token(user, token_name, token_value, read_only=False):
+def create_and_save_new_token_for_user(current_user, read_only=False):
+    token_value = str(uuid.uuid4())
     token_key = sha512(token_value.encode('utf-8')).hexdigest()
-    token = NpmToken(token_name=token_name, token_key=token_key, read_only=read_only, user=user)
+    user = User.get(username=current_user.username)
+    token = NpmToken(token_name=token_key, token_key=token_key, read_only=read_only, user=user)
     token.save()
-    return token
+    return token_value
 
 

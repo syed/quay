@@ -1,10 +1,7 @@
 import logging
 
-from .routes import bp as npm_bp
+from .npm_routes import bp as npm_bp
 from ...plugin import BaseArtifactPlugin
-from alembic import command
-from alembic.config import Config
-
 
 
 PLUGIN_NAME = "npm"
