@@ -1,8 +1,10 @@
 import base64
+import json
 import logging
 from pprint import pprint
 
-from artifacts.plugins.npm.npm_utils import get_npm_tarball
+from artifacts.plugins.npm.npm_utils import parse_package_tarball, get_package_list, check_valid_package_name, \
+    InvalidPackageNameError, parse_package_metadata, get_package_tarball
 from artifacts.utils.plugin_auth import apply_auth_result
 from artifacts.utils.registry_utils import upload_artifact_blob, create_oci_artifact_manifest, calculate_sha256_digest, \
     upload_oci_artifact_manifest, ensure_empty_blob
@@ -12,7 +14,7 @@ from auth.auth_context import get_authenticated_user, get_authenticated_context,
 from flask import Blueprint, request, jsonify, make_response, abort
 
 from artifacts.plugins.npm.npm_auth import get_username_password, get_bearer_token, \
-    validate_npm_auth_token, generate_auth_token_for_publish, delete_npm_token
+    validate_npm_auth_token, generate_auth_token_for_write, delete_npm_token, generate_auth_token_for_read
 from artifacts.plugins.npm.npm_models import create_and_save_new_token_for_user
 
 from util.cache import no_cache
@@ -24,6 +26,7 @@ logger = logging.getLogger(__name__)
 @bp.route('/ping')
 def ping():
     return jsonify({'ok': 'test'}), 200
+
 
 @bp.route('/-/v1/login', methods=['POST'])
 def login_hostname():
@@ -76,11 +79,14 @@ def logout(token):
     return make_response(jsonify({'error': error}), 500)
 
 
-
-
 @bp.route('/<path:package>', methods=['PUT'])
-@validate_npm_auth_token
 def npm_publish_package(package):
+    logger.info(f'🔴🟣🔴🟣🔴🟣 PUT package {package}')
+    try:
+        check_valid_package_name(package)
+    except InvalidPackageNameError as e:
+        return jsonify({'error': str(e)}), 400
+
     logger.info(f'🔴 package {package} auth context {get_authenticated_context()}')
     package_data = request.get_json()
     package_name = package_data.get('name')
@@ -89,20 +95,30 @@ def npm_publish_package(package):
     if not package_name or not package_versions or not package_name.startswith('@'):
         return jsonify({'error': 'Invalid package data'}), 400
 
+    # TODO: can there be multiple versions?
     package_version = list(package_versions.keys())[0]
 
     namespace, repo_name = package_name.split('/')
     namespace = namespace.replace('@', '')
     repo_tag = package_version
-    # scope request to upload package
-    grant_token = generate_auth_token_for_publish(namespace, repo_name)
 
-    # upload blob
-    data = get_npm_tarball(package_data)
+    # scope request to upload package
+    grant_token = generate_auth_token_for_write(namespace, repo_name)
+    logger.info(f'🔴🟣🔴🟣🔴🟣 grant_token {grant_token}')
+
+    # upload config
+    data = parse_package_tarball(package_data)
     if not data:
         return jsonify({'error': 'No data found to upload'}), 400
 
-    ensure_empty_blob(namespace, repo_name, grant_token)
+    metadata = parse_package_metadata(package_data)
+    if not metadata:
+        metadata = {}
+
+    metadata_json = json.dumps(metadata)
+    metadata_digest = calculate_sha256_digest(metadata_json.encode('utf-8'))
+    response = upload_artifact_blob(namespace, repo_name, metadata_json, metadata_digest, grant_token)
+    # TODO: check if the response is good
 
     data_digest = calculate_sha256_digest(data)
     response = upload_artifact_blob(namespace, repo_name, data, data_digest, grant_token)
@@ -111,7 +127,15 @@ def npm_publish_package(package):
     pprint(dict(response.headers))
 
     # create manifest
-    manifest = create_oci_artifact_manifest('application/vnd.npm.package+json', len(data), data_digest, repo_tag)
+    manifest = create_oci_artifact_manifest(
+        media_type='application/vnd.npm.package.v1+json',
+        length=len(data),
+        digest=data_digest,
+        config_media_type='application/vnd.npm.config.v1+json',
+        config_digest=metadata_digest,
+        config_length=len(metadata),
+    )
+
     logger.info(f'🔴🟣🔴🟣🔴🟣 manifest {manifest}')
 
     response = upload_oci_artifact_manifest(namespace, repo_name, manifest, repo_tag, grant_token)
@@ -119,8 +143,31 @@ def npm_publish_package(package):
 
     return jsonify({'ok': 'Package published'}), 200
 
+
 @bp.route('/<path:package>', methods=['GET'])
 def npm_get_package(package):
     logger.info(f'🎁🎁🎁🎁 package {package} auth context {get_authenticated_context()}')
+    try:
+        check_valid_package_name(package)
+    except InvalidPackageNameError as e:
+        return jsonify({'error': str(e)}), 400
 
-    return jsonify({'error': 'Not implemented'}), 501
+    namespace, repo_name = package.split('/')
+    if not namespace or not repo_name:
+        return jsonify({'error': 'Invalid package name'}), 400
+
+    namespace = namespace.replace('@', '')
+    package_list = get_package_list(namespace, repo_name)
+    package_response =  {
+        'name': package,
+        'versions': package_list
+    }
+    return jsonify(package_response), 200
+
+
+@bp.route('/download/<path:namespace>/<path:package_name>/<path:version>', methods=['GET'])
+def npm_get_package_tarball(namespace, package_name, version):
+    # get the package
+    namespace = namespace.replace('@', '')
+    logger.info(f'🎁🎁🎁🎁 package {namespace}/{package_name}/{version} auth context {get_authenticated_context()}')
+    return get_package_tarball(namespace, package_name, version)
