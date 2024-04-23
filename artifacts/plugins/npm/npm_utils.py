@@ -17,8 +17,8 @@ def parse_package_tarball(npm_post_data):
     tarball = list(attachments.values())[0].get('data')
     if not tarball:
         return None
-    base64_bytes = base64.b64decode(tarball)
-    return base64_bytes
+    decoded_bytes = base64.b64decode(tarball)
+    return decoded_bytes
 
 
 def parse_package_metadata(npm_post_data):
@@ -87,6 +87,8 @@ def get_package_tarball(namespace, package_name, package_version):
     response = get_oci_blob(namespace, package_name, data_digest, grant_token)
     if response.status_code != 200:
         raise RegistryError('Error fetching blob')
+
+    logger.info(f'🟢 🟢 🟢 🟢 🟢 tarball\n{response.data}')
 
     return response.data
 

@@ -7,7 +7,7 @@ from artifacts.plugins.npm.npm_utils import parse_package_tarball, get_package_l
     InvalidPackageNameError, parse_package_metadata, get_package_tarball
 from artifacts.utils.plugin_auth import apply_auth_result
 from artifacts.utils.registry_utils import upload_artifact_blob, create_oci_artifact_manifest, calculate_sha256_digest, \
-    upload_oci_artifact_manifest, ensure_empty_blob
+    upload_oci_artifact_manifest
 from auth.credentials import validate_credentials
 
 from auth.auth_context import get_authenticated_user, get_authenticated_context, set_authenticated_context
@@ -123,7 +123,9 @@ def npm_publish_package(package):
     data_digest = calculate_sha256_digest(data)
     response = upload_artifact_blob(namespace, repo_name, data, data_digest, grant_token)
 
-    logger.info(f'🔴🟣🔴🟣🔴🟣 response {response} {response.data}')
+    logger.info(f'🔴🟣🔴🟣🔴🟣 digest {data_digest}')
+    logger.info(f'🔴🟣🔴🟣🔴🟣 response {response}')
+
     pprint(dict(response.headers))
 
     # create manifest
@@ -170,4 +172,7 @@ def npm_get_package_tarball(namespace, package_name, version):
     # get the package
     namespace = namespace.replace('@', '')
     logger.info(f'🎁🎁🎁🎁 package {namespace}/{package_name}/{version} auth context {get_authenticated_context()}')
-    return get_package_tarball(namespace, package_name, version)
+    tarball = get_package_tarball(namespace, package_name, version)
+    r = make_response(tarball)
+    r.headers.set('Content-Type', 'application/octet-stream')
+    return r
