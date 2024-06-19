@@ -71,9 +71,9 @@ def is_in_network_request(context, request_ip, s3_region):
     resolved_ip_info: ResolvedLocation = context.ip_resolver.resolve_ip(request_ip)
     logger.debug("Resolved IP information for IP %s: %s", request_ip, resolved_ip_info)
     return (
-        resolved_ip_info
-        and resolved_ip_info.provider == "aws"
-        and resolved_ip_info.aws_region == s3_region
+            resolved_ip_info
+            and resolved_ip_info.provider == "aws"
+            and resolved_ip_info.aws_region == s3_region
     )
 
 
@@ -119,16 +119,16 @@ class StreamReadKeyAsFile(BufferedIOBase):
 
 class _CloudStorage(BaseStorageV2):
     def __init__(
-        self,
-        context,
-        connection_class,
-        connect_kwargs,
-        upload_params,
-        storage_path,
-        bucket_name,
-        access_key=None,
-        secret_key=None,
-        deferred_refreshable_credentials=None,
+            self,
+            context,
+            connection_class,
+            connect_kwargs,
+            upload_params,
+            storage_path,
+            bucket_name,
+            access_key=None,
+            secret_key=None,
+            deferred_refreshable_credentials=None,
     ):
         super(_CloudStorage, self).__init__()
 
@@ -247,7 +247,7 @@ class _CloudStorage(BaseStorageV2):
         return True
 
     def get_direct_download_url(
-        self, path, request_ip=None, expires_in=60, requires_cors=False, head=False, **kwargs
+            self, path, request_ip=None, expires_in=60, requires_cors=False, head=False, **kwargs
     ):
         self._initialize_cloud_conn()
         path = self._init_path(path)
@@ -335,13 +335,13 @@ class _CloudStorage(BaseStorageV2):
             raise IOError("Exception when trying to stream_write path")
 
     def _stream_write_internal(
-        self,
-        path,
-        fp,
-        content_type=None,
-        content_encoding=None,
-        cancel_on_error=True,
-        size=filelike.READ_UNTIL_END,
+            self,
+            path,
+            fp,
+            content_type=None,
+            content_encoding=None,
+            cancel_on_error=True,
+            size=filelike.READ_UNTIL_END,
     ):
         """
         Writes the data found in the file-like stream to the given path, with optional limit on
@@ -379,6 +379,7 @@ class _CloudStorage(BaseStorageV2):
 
                     buf.seek(0)
                     part = mp.Part(num_part)
+                    logger.info(f"🟨🟨🟨🟨 _stream_write_internal part num : {num_part} size: {bytes_staged} 🟨🟨🟨🟨")
                     part_upload = part.upload(
                         Body=buf,
                         ContentLength=bytes_staged,
@@ -387,9 +388,9 @@ class _CloudStorage(BaseStorageV2):
                     total_bytes_written += bytes_staged
                     num_part += 1
                 except (
-                    botocore.exceptions.ClientError,
-                    botocore.exceptions.ConnectionClosedError,
-                    IOError,
+                        botocore.exceptions.ClientError,
+                        botocore.exceptions.ConnectionClosedError,
+                        IOError,
                 ) as e:
                     logger.warn(
                         "Error when writing to stream in stream_write_internal at path %s: %s",
@@ -410,12 +411,16 @@ class _CloudStorage(BaseStorageV2):
 
         if total_bytes_written > 0:
             multipart_uploads_completed.inc()
+            start_time = datetime.now()
+            logger.info(f"🟣🟣🟣🟣 multipart upload START 🟣🟣🟣🟣")
             self._perform_action_with_retry(
                 mp.complete,
                 MultipartUpload={
                     "Parts": [{"ETag": p.e_tag, "PartNumber": p.part_number} for p in upload_parts],
                 },
             )
+            logger.info(
+                f"🟣🟣🟣🟣 multipart upload completed in {datetime.now() - start_time} total parts {len(upload_parts)} 🟣🟣🟣🟣")
         else:
             mp.abort()
 
@@ -476,12 +481,12 @@ class _CloudStorage(BaseStorageV2):
         # First try to copy directly via boto, but only if the storages are the
         # same type, with the same access information.
         if (
-            self.__class__ == destination.__class__
-            and self._access_key
-            and self._secret_key
-            and self._access_key == destination._access_key
-            and self._secret_key == destination._secret_key
-            and self._connect_kwargs == destination._connect_kwargs
+                self.__class__ == destination.__class__
+                and self._access_key
+                and self._secret_key
+                and self._access_key == destination._access_key
+                and self._secret_key == destination._secret_key
+                and self._connect_kwargs == destination._connect_kwargs
         ):
 
             # Initialize the cloud connection on the destination as well.
@@ -540,6 +545,7 @@ class _CloudStorage(BaseStorageV2):
     def stream_upload_chunk(self, uuid, offset, length, in_fp, storage_metadata, content_type=None):
         self._initialize_cloud_conn()
 
+        logger.info(f"🟥🟥🟥🟥 stream_upload_chunk: {uuid} offset: {offset} length: {length} 🟥🟥🟥🟥")
         # We are going to upload each chunk to a separate key
         chunk_path = self._rel_upload_path(str(uuid4()))
         bytes_written, write_error = self._stream_write_internal(
@@ -610,9 +616,9 @@ class _CloudStorage(BaseStorageV2):
                 # sometimes HTTPStatusCode isn't set for some reason, so we need
                 # to protect ourselves against a KeyError.
                 if (
-                    remaining_retries
-                    and s3re.response["Error"].get("HTTPStatusCode", 0) == 200
-                    and s3re.response["Error"].get("Code", "") == "InternalError"
+                        remaining_retries
+                        and s3re.response["Error"].get("HTTPStatusCode", 0) == 200
+                        and s3re.response["Error"].get("Code", "") == "InternalError"
                 ):
                     # Weird internal error case. Retry.
                     continue
@@ -635,8 +641,8 @@ class _CloudStorage(BaseStorageV2):
                 chunk.path, chunk.offset + newchunk_length, chunk.length - newchunk_length
             )
             for subchunk in chain(
-                _CloudStorage._rechunk(first_subchunk, max_chunk_size),
-                _CloudStorage._rechunk(second_subchunk, max_chunk_size),
+                    _CloudStorage._rechunk(first_subchunk, max_chunk_size),
+                    _CloudStorage._rechunk(second_subchunk, max_chunk_size),
             ):
                 yield subchunk
 
@@ -663,7 +669,26 @@ class _CloudStorage(BaseStorageV2):
             logger.debug("Performing server side assembly of multi-part upload for: %s", final_path)
             try:
                 # Awesome, we can do this completely server side, now we have to start a new multipart
-                # upload and use copy_part_from_key to set all of the chunks.
+                # upload and use copy_part_from_key to set all the chunks.
+                start_time = datetime.now()
+                logger.info(f"🟥🟥🟥🟥 START copy to final destination {start_time}  🟥🟥🟥🟥")
+
+                if len(chunk_list) == 1:
+                    # If there is only one chunk, we can just copy the whole thing
+                    # this is faster than multipart upload which is limited to 5GB (on S3)
+                    chunk = chunk_list[0]
+                    abs_chunk_path = self._init_path(chunk.path)
+
+                    logger.info(f"🟥🟥🟥🟥 USING DIRECT COPY from {abs_chunk_path} to {final_path}  🟥🟥🟥🟥")
+                    self.get_cloud_conn().copy(
+                        CopySource={"Bucket": self.get_cloud_bucket().name, "Key": abs_chunk_path},
+                        Bucket=self.get_cloud_bucket().name, Key=final_path)
+
+                    logger.info(f"🟥🟥🟥🟥 complete_chunked_upload: END took {datetime.now() - start_time} seconds  🟥🟥🟥🟥")
+                    return
+
+                # for multiple chunks, we need to use multipart upload
+                # this copies in 5GB chunks max (for S3)
                 mpu = self.__initiate_multipart_upload(
                     final_path, content_type=None, content_encoding=None
                 )
@@ -675,16 +700,16 @@ class _CloudStorage(BaseStorageV2):
                 upload_parts = []
                 for index, chunk in enumerate(updated_chunks):
                     abs_chunk_path = self._init_path(chunk.path)
-
+                    logger.info(
+                        f"🎾🎾🎾🎾 complete_chunked_upload chunk path: {abs_chunk_path} index: {index} length: {chunk.length} offset : {chunk.offset} 🎾🎾🎾🎾")
+                    logger.info(f"🎾🎾🎾🎾 complete_chunked_upload copy from {chunk} to {abs_chunk_path} 🎾🎾🎾🎾")
                     part_copy = self._perform_action_with_retry(
                         mpu.Part(index + 1).copy_from,
                         CopySource={"Bucket": self.get_cloud_bucket().name, "Key": abs_chunk_path},
                         CopySourceRange="bytes=%s-%s"
-                        % (chunk.offset, chunk.length + chunk.offset - 1),
+                                        % (chunk.offset, chunk.length + chunk.offset - 1),
                     )
-
                     upload_parts.append(_PartUpload(index + 1, part_copy["CopyPartResult"]["ETag"]))
-
                 self._perform_action_with_retry(
                     mpu.complete,
                     MultipartUpload={
@@ -693,6 +718,7 @@ class _CloudStorage(BaseStorageV2):
                         ]
                     },
                 )
+
             except (botocore.exceptions.ClientError, IOError) as ioe:
                 # Something bad happened, log it and then give up
                 msg = "Exception when attempting server-side assembly for: %s"
@@ -748,24 +774,24 @@ class S3Storage(_CloudStorage):
     }
 
     def __init__(
-        self,
-        context,
-        storage_path,
-        s3_bucket,
-        s3_access_key=None,
-        s3_secret_key=None,
-        s3_region=None,
-        # Boto2 backward compatible options (host excluding scheme or port)
-        host=None,
-        port=None,
-        # Boto3 options (Full url including scheme anbd optionally port)
-        endpoint_url=None,
-        # Chunk size options for multipart upload
-        maximum_chunk_size_gb=None,
-        minimum_chunk_size_mb=None,
-        # STS Options
-        aws_session_token=None,
-        deferred_refreshable_credentials=None,
+            self,
+            context,
+            storage_path,
+            s3_bucket,
+            s3_access_key=None,
+            s3_secret_key=None,
+            s3_region=None,
+            # Boto2 backward compatible options (host excluding scheme or port)
+            host=None,
+            port=None,
+            # Boto3 options (Full url including scheme anbd optionally port)
+            endpoint_url=None,
+            # Chunk size options for multipart upload
+            maximum_chunk_size_gb=None,
+            minimum_chunk_size_mb=None,
+            # STS Options
+            aws_session_token=None,
+            deferred_refreshable_credentials=None,
     ):
         upload_params = {"ServerSideEncryption": "AES256"}
         connect_kwargs = {
@@ -802,7 +828,7 @@ class S3Storage(_CloudStorage):
         self.maximum_chunk_size = chunk_size * 1024 * 1024 * 1024
 
         self.minimum_chunk_size = (
-            (minimum_chunk_size_mb if minimum_chunk_size_mb is not None else 5) * 1024 * 1024
+                (minimum_chunk_size_mb if minimum_chunk_size_mb is not None else 5) * 1024 * 1024
         )
 
     def setup(self):
@@ -828,16 +854,16 @@ class S3Storage(_CloudStorage):
 
 class IBMCloudStorage(_CloudStorage):
     def __init__(
-        self,
-        context,
-        hostname,
-        is_secure,
-        storage_path,
-        access_key,
-        secret_key,
-        bucket_name,
-        port=None,
-        maximum_chunk_size_mb=None,
+            self,
+            context,
+            hostname,
+            is_secure,
+            storage_path,
+            access_key,
+            secret_key,
+            bucket_name,
+            port=None,
+            maximum_chunk_size_mb=None,
     ):
         upload_params = {}
         connect_kwargs = {
@@ -946,7 +972,7 @@ class GoogleCloudStorage(_CloudStorage):
         )
 
     def get_direct_download_url(
-        self, path, request_ip=None, expires_in=60, requires_cors=False, head=False, **kwargs
+            self, path, request_ip=None, expires_in=60, requires_cors=False, head=False, **kwargs
     ):
         return (
             super(GoogleCloudStorage, self)
@@ -955,13 +981,13 @@ class GoogleCloudStorage(_CloudStorage):
         )
 
     def _stream_write_internal(
-        self,
-        path,
-        fp,
-        content_type=None,
-        content_encoding=None,
-        cancel_on_error=True,
-        size=filelike.READ_UNTIL_END,
+            self,
+            path,
+            fp,
+            content_type=None,
+            content_encoding=None,
+            cancel_on_error=True,
+            size=filelike.READ_UNTIL_END,
     ):
         """
         Writes the data found in the file-like stream to the given path, with optional limit on
@@ -1010,17 +1036,17 @@ class GoogleCloudStorage(_CloudStorage):
 
 class RadosGWStorage(_CloudStorage):
     def __init__(
-        self,
-        context,
-        hostname,
-        is_secure,
-        storage_path,
-        access_key,
-        secret_key,
-        bucket_name,
-        port=None,
-        maximum_chunk_size_mb=None,
-        server_side_assembly=True,
+            self,
+            context,
+            hostname,
+            is_secure,
+            storage_path,
+            access_key,
+            secret_key,
+            bucket_name,
+            port=None,
+            maximum_chunk_size_mb=None,
+            server_side_assembly=True,
     ):
         upload_params = {}
         connect_kwargs = {
@@ -1051,7 +1077,7 @@ class RadosGWStorage(_CloudStorage):
 
     # TODO remove when radosgw supports cors: http://tracker.ceph.com/issues/8718#change-38624
     def get_direct_download_url(
-        self, path, request_ip=None, expires_in=60, requires_cors=False, head=False, **kwargs
+            self, path, request_ip=None, expires_in=60, requires_cors=False, head=False, **kwargs
     ):
         if requires_cors:
             return None
@@ -1102,17 +1128,17 @@ class CloudFrontedS3Storage(S3Storage):
     """
 
     def __init__(
-        self,
-        context,
-        cloudfront_distribution_domain,
-        cloudfront_key_id,
-        cloudfront_privatekey_filename,
-        storage_path,
-        s3_bucket,
-        s3_region,
-        cloudfront_distribution_org_overrides=None,
-        *args,
-        **kwargs,
+            self,
+            context,
+            cloudfront_distribution_domain,
+            cloudfront_key_id,
+            cloudfront_privatekey_filename,
+            storage_path,
+            s3_bucket,
+            s3_region,
+            cloudfront_distribution_org_overrides=None,
+            *args,
+            **kwargs,
     ):
         super(CloudFrontedS3Storage, self).__init__(
             context, storage_path, s3_bucket, *args, **kwargs
@@ -1125,7 +1151,7 @@ class CloudFrontedS3Storage(S3Storage):
         self.cloudfront_distribution_org_overrides = cloudfront_distribution_org_overrides
 
     def get_direct_download_url(
-        self, path, request_ip=None, expires_in=60, requires_cors=False, head=False, **kwargs
+            self, path, request_ip=None, expires_in=60, requires_cors=False, head=False, **kwargs
     ):
 
         # If CloudFront could not be loaded, fall back to normal S3.
@@ -1145,8 +1171,8 @@ class CloudFrontedS3Storage(S3Storage):
         if kwargs:
             namespace = kwargs.get("namespace")
             if (
-                self.cloudfront_distribution_org_overrides
-                and namespace in self.cloudfront_distribution_org_overrides
+                    self.cloudfront_distribution_org_overrides
+                    and namespace in self.cloudfront_distribution_org_overrides
             ):
                 domain = self.cloudfront_distribution_org_overrides.get(namespace)
 
@@ -1187,8 +1213,8 @@ class CloudFrontedS3Storage(S3Storage):
             return None
 
         with self._context.config_provider.get_volume_file(
-            cloudfront_privatekey_filename,
-            mode="rb",
+                cloudfront_privatekey_filename,
+                mode="rb",
         ) as key_file:
             return serialization.load_pem_private_key(
                 key_file.read(), password=None, backend=default_backend()
@@ -1197,16 +1223,16 @@ class CloudFrontedS3Storage(S3Storage):
 
 class STSS3Storage(S3Storage):
     def __init__(
-        self,
-        context,
-        storage_path,
-        s3_bucket,
-        sts_role_arn=None,
-        sts_user_access_key=None,
-        sts_user_secret_key=None,
-        s3_region=None,
-        endpoint_url=None,
-        maximum_chunk_size_gb=None,
+            self,
+            context,
+            storage_path,
+            s3_bucket,
+            sts_role_arn=None,
+            sts_user_access_key=None,
+            sts_user_secret_key=None,
+            s3_region=None,
+            endpoint_url=None,
+            maximum_chunk_size_gb=None,
     ):
         sts_client = boto3.client(
             "sts", aws_access_key_id=sts_user_access_key, aws_secret_access_key=sts_user_secret_key

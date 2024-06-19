@@ -544,7 +544,10 @@ def _upload_chunk(blob_uploader, commit_digest=None):
     If commit_digest is specified, the upload is committed to a blob once the stream's data has been
     read and stored.
     """
+    logger.info(f"🟥🟥🟥🟥🟥 _upload_chunk(blob_uploader, commit_digest={commit_digest})")
     start_offset, length = _start_offset_and_length(request.headers.get("content-range"))
+    logger.info(f"🟥🟥🟥🟥🟥 start_offset={start_offset}, length={length}")
+
     if None in {start_offset, length}:
         raise InvalidRequest(message="Invalid range header")
 

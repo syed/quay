@@ -2,6 +2,7 @@ import logging
 import time
 from collections import namedtuple
 from contextlib import contextmanager
+from datetime import datetime
 
 import bitmath
 from prometheus_client import Counter, Histogram
@@ -183,6 +184,7 @@ class _BlobUploadManager(object):
         # Ensure that we won't go over the allowed maximum size for blobs.
         max_blob_size = bitmath.parse_string_unsafe(self.settings.maximum_blob_size)
         uploaded = bitmath.Byte(length + start_offset)
+        logger.info(f"🟥🟥🟥🟥 upload_chunk uploaded: {uploaded.bytes}, max_blob_size: {max_blob_size.bytes} 🟥🟥🟥🟥")
         if length > -1 and uploaded > max_blob_size:
             raise BlobTooLargeException(uploaded=uploaded.bytes, max_allowed=max_blob_size.bytes)
 
@@ -357,11 +359,15 @@ class _BlobUploadManager(object):
             else:
                 # We were the first ones to upload this image (at least to this location)
                 # Let's copy it into place
+                start_time = datetime.now()
+                logger.info(f"🟥🟥🟥🟥 start _finalize_blob_storage {self.blob_upload.upload_id} to {final_blob_location} 🟥🟥🟥🟥")
                 self.storage.complete_chunked_upload(
                     {self.blob_upload.location_name},
                     self.blob_upload.upload_id,
                     final_blob_location,
                     self.blob_upload.storage_metadata,
                 )
+
+                logger.info(f"🟥🟥🟥🟥 end _finalize_blob_storage took {datetime.now() - start_time } 🟥🟥🟥🟥")
 
         return already_existed
