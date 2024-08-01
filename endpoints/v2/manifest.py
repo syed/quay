@@ -5,6 +5,7 @@ from flask import Response, request, url_for
 
 import features
 from app import app, model_cache, storage
+from artifacts import notification_manager as plugin_notification_manager
 from auth.registry_jwt_auth import process_registry_jwt_auth
 from data.database import db_disallow_replica_use
 from data.model import (
@@ -413,6 +414,9 @@ def _write_manifest_and_log(namespace_name, repo_name, tag_name, manifest_impl):
         if features.STORAGE_REPLICATION:
             _enqueue_blobs_for_replication(manifest, storage, namespace_name)
 
+        plugin_notification_manager.notify_plugins(
+            "push_repo", namespace_name, repo_name, tag_name, manifest
+        )
         track_and_log("push_repo", repository_ref, tag=tag_name)
         spawn_notification(repository_ref, "repo_push", {"updated_tags": [tag_name]})
         image_pushes.labels("v2", 201, manifest.media_type).inc()
