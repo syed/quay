@@ -408,6 +408,9 @@ class _CloudStorage(BaseStorageV2):
                     else:
                         break
 
+        logger.warning(
+            f"upload_parts: {upload_parts}, total_bytes_written: {total_bytes_written}, write_error: {write_error}"
+        )
         if total_bytes_written > 0:
             multipart_uploads_completed.inc()
             self._perform_action_with_retry(
