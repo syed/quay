@@ -384,6 +384,12 @@ def upload_chunk(namespace_name, repo_name, upload_uuid):
     if uploader is None:
         raise BlobUploadUnknown()
 
+    logger.warning(f"URL : {request.url}")
+
+    logger.warning("Request Headers:")
+    for header, value in request.headers.items():
+        logger.warning(f"{header}: {value}")
+
     # Upload the chunk for the blob.
     _upload_chunk(uploader)
 
