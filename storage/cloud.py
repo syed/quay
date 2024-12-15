@@ -387,6 +387,9 @@ class _CloudStorage(BaseStorageV2):
                     )
                     upload_parts.append(_PartUpload(num_part, part_upload["ETag"]))
                     total_bytes_written += bytes_staged
+                    logger.warning(
+                        f"num_part: {num_part}, bytes_staged: {bytes_staged}, total_bytes_written: {total_bytes_written}"
+                    )
                     num_part += 1
                 except (
                     botocore.exceptions.ClientError,
