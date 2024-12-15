@@ -368,7 +368,9 @@ class _CloudStorage(BaseStorageV2):
             if size != filelike.READ_UNTIL_END:
                 # We never want to ask for more bytes than our caller has indicated to copy
                 bytes_to_copy = min(bytes_to_copy, size - total_bytes_written)
-
+            logger.warning(
+                f"bytes_to_copy: {bytes_to_copy}, minimum_chunk_size: {self.minimum_chunk_size}"
+            )
             with BytesIO() as buf:
                 try:
                     # Stage the bytes into the buffer for use with the multipart upload file API
