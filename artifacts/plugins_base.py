@@ -1,11 +1,11 @@
+import logging
 from enum import Enum
 from types import FunctionType
 
 from flask.testing import FlaskClient
 
 from data.registry_model import registry_model
-from endpoints.v2 import NameUnknown
-import logging
+from endpoints.v2.errors import NameUnknown
 
 logger = logging.getLogger(__name__)
 

@@ -2,7 +2,7 @@ import {Component, Inject} from 'ng-metadata/core';
 
 @Component({
   selector: 'new-ui-toggle',
-  templateUrl: '/static/js/directives/ui/new-ui-toggle/new-ui-toggle.component.html',
+  templateUrl: '/js/directives/ui/new-ui-toggle/new-ui-toggle.component.html',
 })
 export class NewUiToggleComponent {
   private newUIIsActive: boolean = false;
