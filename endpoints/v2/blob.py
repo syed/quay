@@ -384,12 +384,6 @@ def upload_chunk(namespace_name, repo_name, upload_uuid):
     if uploader is None:
         raise BlobUploadUnknown()
 
-    logger.warning(f"URL : {request.url}")
-
-    logger.warning("Request Headers:")
-    for header, value in request.headers.items():
-        logger.warning(f"{header}: {value}")
-
     # Upload the chunk for the blob.
     _upload_chunk(uploader)
 
@@ -568,6 +562,12 @@ def _upload_chunk(blob_uploader, commit_digest=None):
     start_offset, length = _start_offset_and_length(request.headers.get("content-range"))
     if None in {start_offset, length}:
         raise InvalidRequest(message="Invalid range header")
+
+    logger.warning(f"URL : {request.url}")
+
+    logger.warning("Request Headers:")
+    for header, value in request.headers.items():
+        logger.warning(f"{header}: {value}")
 
     input_fp = get_input_stream(request)
 
