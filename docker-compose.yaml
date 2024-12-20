@@ -3,11 +3,17 @@ volumes:
   quay-db-data:
   clair-db-data:
 
+networks:
+  kind:
+    external: true
+
 services:
   quay-db:
     user: postgres
     container_name: quay-db
     image: docker.io/library/postgres:12.1
+    networks:
+      - kind
     environment:
       POSTGRES_USER: "quay"
       POSTGRES_PASSWORD: "quay"
@@ -28,6 +34,9 @@ services:
     user: postgres
     container_name: clair-db
     image: docker.io/library/postgres:12.1
+    networks:
+      - kind
+
     command: -c 'max_connections=300'
     environment:
       POSTGRES_USER: "clair"
@@ -48,12 +57,18 @@ services:
     user: nobody
     container_name: quay-redis
     image: docker.io/library/redis:latest
+    networks:
+      - kind
+
     ports:
       - "6379:6379"
 
   local-dev-frontend:
     user: ${DOCKER_USER:-root}
     container_name: quay-local-dev-frontend
+    networks:
+      - kind
+
     build:
       context: .
       target: build-static
@@ -72,6 +87,9 @@ services:
   quay:
     user: ${DOCKER_USER:-nobody:0}
     container_name: quay-quay
+    networks:
+      - kind
+
     build:
       context: .
       target: final

@@ -1,14 +1,13 @@
 """Create JSON annotations DB
 
 Revision ID: 60466129c903
-Revises: 
+Revises:
 Create Date: 2024-07-22 18:14:54.648670
 
 """
-from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects.postgresql import JSONB
-
+from alembic import op
+from sqlalchemy.dialects.postgresql import JSONB, TEXT
 
 # revision identifiers, used by Alembic.
 revision = "60466129c903"
@@ -32,6 +31,7 @@ def upgrade():
             index=True,
         ),
         sa.Column("metadata", JSONB, nullable=True, index=True),
+        sa.Column("git_hash", TEXT, nullable=True, index=True),
     )
 
 

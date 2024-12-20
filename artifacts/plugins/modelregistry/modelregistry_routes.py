@@ -4,7 +4,12 @@ from flask import Blueprint, abort, jsonify, make_response, request
 from peewee import fn
 
 from artifacts.plugins.modelregistry import PLUGIN_NAME, URL_PREFIX, hf_utils
+from artifacts.plugins.modelregistry.hf_utils import validate_hf_token
 from artifacts.plugins.modelregistry.modelregistry_models import ModelRegistryMetadata
+from artifacts.utils.plugin_auth import (
+    generate_auth_token_for_read,
+    validate_plugin_auth,
+)
 
 from auth.decorators import process_oauth
 from data.database import db
@@ -38,21 +43,68 @@ def search(namespace, repo):
 
 
 # START: Huggingface compatible API for fetching models (EXPERIMENTAL)
+
+
+@bp.route("/api/models")
+def hf_model_list():
+    return jsonify([]), 200
+
+
 @bp.route("/api/models/<namespace>/<repo>")
 def hf_model_info(namespace, repo):
     revision = "main"  # default to main
+    logger.info(f"🔴🟣🔴🟣🔴🟣 hf_model_info {namespace}, {repo}")
     return hf_model_info_by_revision(namespace, repo, revision)
 
 
 @bp.route("/api/models/<namespace>/<repo>/revision/<revision>")
-def hf_model_info_by_revision(namespace, repo, revision):
+@validate_plugin_auth(validate_hf_token)
+def hf_model_info_by_revision(auth_result, namespace, repo, revision):
+    # revision can be a tag or a commit hash
+    # try with tag first
     tag = revision
+    token = generate_auth_token_for_read(auth_result, namespace, repo)
     model_info = {
         "id": f"{namespace}/{repo}",
         "modelId": f"{namespace}/{repo}",
-        "sha": hf_utils.get_revision_sha(namespace, repo, tag),
+        "sha": hf_utils.get_revision_sha(namespace, repo, tag, token),
+        "siblings": [
+            {"rfilename": filename}
+            for filename in hf_utils.get_model_filenames(namespace, repo, tag, token)
+        ],
     }
+
     return jsonify(model_info), 200
+
+
+@bp.route("/<namespace>/<repo>/resolve/<revision>/<path:filename>", methods=["HEAD"])
+@validate_plugin_auth(validate_hf_token)
+def head_hf_model_file(auth_result, namespace, repo, revision, filename):
+    tag = revision
+    logger.info(f"🔴🟣🔴🟣🔴🟣 head_hf_model_file {namespace}, {repo}, {tag}, {filename}")
+    token = generate_auth_token_for_read(auth_result, namespace, repo)
+    response = hf_utils.head_model_file(namespace, repo, tag, filename, token)
+
+    if not response:
+        abort(404, f"file {filename} not found")
+
+    return response
+
+
+#     if response.status_code == 200:
+#         return response
+#
+
+# if tag fails, try with commit hash
+# manifest = hf_utils.get_manifest_for_commit_hash(namespace, repo, revision, token)
+
+
+@bp.route("/<namespace>/<repo>/resolve/<revision>/<path:filename>")
+@validate_plugin_auth(validate_hf_token)
+def fetch_hf_model_file(auth_result, namespace, repo, revision, filename):
+    tag = revision
+    token = generate_auth_token_for_read(auth_result, namespace, repo)
+    return hf_utils.get_model_file(namespace, repo, tag, filename, token)
 
 
 # END: Huggingface compatible API for fetching models (EXPERIMENTAL)

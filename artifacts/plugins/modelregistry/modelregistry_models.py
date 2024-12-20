@@ -1,4 +1,4 @@
-from peewee import CharField, ForeignKeyField
+from peewee import CharField, ForeignKeyField, TextField
 from playhouse.postgres_ext import BinaryJSONField
 
 from data.database import BaseModel, Manifest
@@ -7,6 +7,7 @@ from data.database import BaseModel, Manifest
 class ModelRegistryMetadata(BaseModel):
     manifest = ForeignKeyField(Manifest)
     metadata = BinaryJSONField()
+    git_hash = TextField(null=True)
 
 
 def get_model_metadata(manifest_id):
@@ -22,9 +23,16 @@ def get_model_metadata(manifest_id):
         return None
 
 
-def save_model_metadata(manifest_id, metadata):
-    ModelRegistryMetadata(manifest_id=manifest_id, metadata=metadata).save()
+def save_model_metadata(manifest_id, metadata, git_hash):
+    ModelRegistryMetadata(manifest_id=manifest_id, metadata=metadata, git_hash=git_hash).save()
 
 
 def delete_model_metadata(manifest_id):
     ModelRegistryMetadata.delete().where(manifest_id=manifest_id).execute()
+
+
+#### HF UTILS ####
+def get_manifest_sha_for_git_hash(git_hash):
+    result = ModelRegistryMetadata.get_or_none(ModelRegistryMetadata.git_hash == git_hash)
+
+    return result.manifest.digest if result else None
