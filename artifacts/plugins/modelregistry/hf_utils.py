@@ -175,16 +175,20 @@ def save_huggingface_metadata(manifest: Manifest):
     for layer in manifest_parsed.get("layers", []):
         annotation = layer.get("annotations", {})
         if annotation.get("filename") == "README.md":
-            repository = manifest.repository
-            modelcard_data = get_blob_data(
-                repository.namespace_user, repository.name, layer["digest"], client
-            )
-            metadata, remaining_markdown = extract_metdata_from_modelcard(modelcard_data)
+            # repository = manifest.repository
+            # modelcard_data = get_blob_data(
+            #     repository., repository.name, layer["digest"], client
+            # )
+            # metadata, remaining_markdown = extract_metdata_from_modelcard(modelcard_data)
+            # if not metadata:
+            metadata = {}
+            remaining_markdown = None
+
             logger.info(f"🔴🟣🔴🟣🔴🟣 metadata {metadata}, remaining_markdown {remaining_markdown}")
-            if metadata:
-                save_model_metadata(
-                    manifest_id, metadata, manifest_parsed.get("annotations", {}).get("git-hash")
-                )
+            save_model_metadata(
+                manifest_id, metadata, manifest_parsed.get("annotations", {}).get("git-hash")
+            )
+
             if remaining_markdown:
                 # update repository description
                 set_description(manifest.repository, remaining_markdown)

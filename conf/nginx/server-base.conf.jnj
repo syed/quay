@@ -132,7 +132,7 @@ location /secscan/ {
 
 location /artifacts/ {
     proxy_pass http://registry_app_server;
-    proxy_read_timeout 10;
+    proxy_read_timeout 300;
     keepalive_timeout 0; # Disables HTTP 1.1 keep-alive and forces round-robin.
 
     {% if enable_rate_limits %}

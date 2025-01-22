@@ -38,7 +38,7 @@ def handle_manifest_push(namespace_name, repo_name, tag_name, manifest: Manifest
 
     # save_config_blob_metadata(manifest.id, manifest_parsed, namespace_name, repo_name)
     # Experiment: Huggingface integration
-    # save_huggingface_metadata(manifest)
+    save_huggingface_metadata(manifest)
 
 
 def save_config_blob_metadata(manifest_id, manifest_parsed, namespace_name, repo_name):
