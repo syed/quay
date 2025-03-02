@@ -236,12 +236,20 @@ class QuayRegistryClient:
             abort(401, message=response.data)
         return response
 
-    def get_oci_blob(self, namespace, repo_name, digest, grant_token):
+    def get_oci_blob(self, namespace, repo_name, digest, grant_token, follow_cdn=False):
         path = f"/v2/{namespace}/{repo_name}/blobs/{digest}"
         headers = {"Authorization": f"Bearer {grant_token}"}
         response = self._do_request("GET", path, headers=headers)
         if response.status_code == 401:
             abort(401, message=response.data)
+        if response.status_code == 200:
+            return response
+        elif response.status_code == 302 and follow_cdn:
+            location = response.headers.get("Location")
+            response = requests.get("GET", location, headers=headers)
+            if response.status_code == 401:
+                abort(401, message=response.data)
+            return response
         return response
 
     def update_repository_kind(self, namespace, repo_name, kind):
