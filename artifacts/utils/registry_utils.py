@@ -4,6 +4,7 @@ import logging
 from pprint import pprint
 from typing import List
 
+import requests
 from flask import request
 
 from artifacts.utils.plugin_auth import generate_auth_token_for_read
