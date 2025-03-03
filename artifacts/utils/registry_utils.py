@@ -250,7 +250,8 @@ class QuayRegistryClient:
             response = requests.get(location)
             if response.status_code == 401:
                 abort(401, message=response.data)
-            setattr(response, "data", response.headers)
+            setattr(response, "data", "")
+
             return response
         return response
 
