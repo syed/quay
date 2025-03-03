@@ -111,7 +111,7 @@ def get_model_file(namespace, repo, tag, filename, token):
     for layer in layers:
         annotation = layer.get("annotations", {})
         if annotation.get("filename") == filename:
-            resp = client.get_oci_blob(namespace, repo, layer["digest"], token, follow_cdn=True)
+            resp = client.get_oci_blob(namespace, repo, layer["digest"], token, follow_cdn=False)
             logger.info(
                 f"🔴🟣🔴🟣🔴🟣 fetching blob {layer['digest']} resp: {resp.status_code} {resp.headers}"
             )
@@ -120,7 +120,7 @@ def get_model_file(namespace, repo, tag, filename, token):
             headers["x-repo-commit"] = manifest_git_hash
             del resp.headers["Accept-Ranges"]  # Do not support range requests (bug in HF lib)
 
-            return Response(resp.data, headers=headers)
+            return Response(resp.data, headers=headers, status=resp.status_code)
     return None
 
 
