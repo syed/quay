@@ -115,11 +115,12 @@ def get_model_file(namespace, repo, tag, filename, token):
             logger.info(
                 f"🔴🟣🔴🟣🔴🟣 fetching blob {layer['digest']} resp: {resp.status_code} {resp.headers}"
             )
-            resp.headers["etag"] = f'"{annotation.get("git-hash")}"'
-            resp.headers["x-repo-commit"] = manifest_git_hash
+            headers = {}
+            headers["etag"] = f'"{annotation.get("git-hash")}"'
+            headers["x-repo-commit"] = manifest_git_hash
             del resp.headers["Accept-Ranges"]  # Do not support range requests (bug in HF lib)
 
-            return Response(resp.data, headers=resp.headers, status=resp.status_code)
+            return Response(resp.data, headers=headers)
     return None
 
 
