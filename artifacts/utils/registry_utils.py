@@ -253,7 +253,7 @@ class QuayRegistryClient:
                     abort(401, message=response.data)
                 setattr(response, "data", response.content)
             else:
-                response.data = None
+                response.data = ""
                 return response
 
             return response
