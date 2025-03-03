@@ -111,13 +111,13 @@ def get_model_file(namespace, repo, tag, filename, token):
     for layer in layers:
         annotation = layer.get("annotations", {})
         if annotation.get("filename") == filename:
-            resp = client.get_oci_blob(namespace, repo, layer["digest"], token, follow_cdn=True)
+            resp = client.get_oci_blob(namespace, repo, layer["digest"], token, follow_cdn=False)
             logger.info(
                 f"🔴🟣🔴🟣🔴🟣 fetching blob {layer['digest']} resp: {resp.status_code} {resp.headers}"
             )
             resp.headers["etag"] = f'"{annotation.get("git-hash")}"'
             resp.headers["x-repo-commit"] = manifest_git_hash
-            return Response(resp.data, headers=resp.headers)
+            return Response(resp.data, headers=resp.headers, status=resp.status_code)
     return None
 
 
