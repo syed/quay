@@ -118,6 +118,8 @@ def get_model_file(namespace, repo, tag, filename, token):
             headers = {}
             headers["etag"] = f'"{annotation.get("git-hash")}"'
             headers["x-repo-commit"] = manifest_git_hash
+            headers["Location"] = resp.headers.get("Location")
+
             del resp.headers["Accept-Ranges"]  # Do not support range requests (bug in HF lib)
 
             return Response(resp.data, headers=headers, status=resp.status_code)
