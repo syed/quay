@@ -117,7 +117,7 @@ def get_model_file(namespace, repo, tag, filename, token):
             )
             resp.headers["etag"] = f'"{annotation.get("git-hash")}"'
             resp.headers["x-repo-commit"] = manifest_git_hash
-            return Response(untar_response_data(resp.data), headers=resp.headers)
+            return Response(resp.data, headers=resp.headers)
     return None
 
 
