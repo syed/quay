@@ -247,7 +247,7 @@ class QuayRegistryClient:
             return response
         elif response.status_code == 302 and follow_cdn:
             location = response.headers.get("Location")
-            response = requests.get("GET", location, headers=headers)
+            response = self._do_request("GET", location, headers=headers)
             if response.status_code == 401:
                 abort(401, message=response.data)
             return response
