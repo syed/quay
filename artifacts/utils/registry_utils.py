@@ -245,12 +245,16 @@ class QuayRegistryClient:
             abort(401, message=response.data)
         if response.status_code == 200:
             return response
-        elif response.status_code == 302 and follow_cdn:
-            location = response.headers.get("Location")
-            response = requests.get(location)
-            if response.status_code == 401:
-                abort(401, message=response.data)
-            setattr(response, "data", "")
+        elif response.status_code == 302:
+            if follow_cdn:
+                location = response.headers.get("Location")
+                response = requests.get(location)
+                if response.status_code == 401:
+                    abort(401, message=response.data)
+                setattr(response, "data", response.content)
+            else:
+                response.data = None
+                return response
 
             return response
         return response
