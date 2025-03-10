@@ -10,7 +10,7 @@ from artifacts.plugins.modelregistry.constants import (
 from artifacts.plugins.modelregistry.hf_utils import save_huggingface_metadata
 from artifacts.plugins.modelregistry.modelregistry_models import (
     ModelRegistryMetadata,
-    save_model_metadata,
+    upsert_model_metadata,
 )
 from artifacts.utils.plugin_auth import generate_auth_token_for_read
 from artifacts.utils.registry_utils import QuayRegistryClient
@@ -50,7 +50,7 @@ def save_config_blob_metadata(manifest_id, manifest_parsed, namespace_name, repo
     try:
         config_parsed = json.loads(config_blob.data)
         git_hash = manifest_parsed.get("annotations", {}).get("git-hash")
-        save_model_metadata(manifest_id, config_parsed, git_hash)
+        upsert_model_metadata(manifest_id, config_parsed, git_hash)
     except json.JSONDecodeError:
         logger.warning(f"config {config_blob.data} is not a valid JSON")
         return

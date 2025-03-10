@@ -1,4 +1,5 @@
 import hashlib
+import io
 import json
 import logging
 from pprint import pprint
@@ -31,14 +32,14 @@ class RegistryError(Exception):
 
 # TODO: Eventually these classes can be abosrbed into the OCI module (image.oci)
 class OCILayer:
-    def __init__(self, media_type, length, digest, annotations=None):
+    def __init__(self, media_type, size, digest, annotations=None):
         self.media_type = media_type
-        self.length = length
+        self.size = size
         self.digest = digest
         self.annotations = annotations
 
     def to_dict(self):
-        data = {"mediaType": self.media_type, "size": self.length, "digest": self.digest}
+        data = {"mediaType": self.media_type, "size": self.size, "digest": self.digest}
         if self.annotations:
             data["annotations"] = self.annotations
 
@@ -66,29 +67,37 @@ class OCIEmptyConfigLayer(OCIConfigLayer):
 
 
 class OCIArtifactManifest:
-    def __init__(self, artifact_type, config_layer: OCIConfigLayer, layers: List[OCILayer]):
+    def __init__(
+        self, artifact_type, config_layer: OCIConfigLayer, layers: List[OCILayer], annotations=None
+    ):
         self.artifact_type = artifact_type
         self.config_layer = config_layer
         self.layers = layers
+        self.annotations = annotations
 
     def to_dict(self):
-        return {
+        data = {
             "schemaVersion": 2,
             "mediaType": OCI_IMAGE_MANIFEST_CONTENT_TYPE,
             "artifactType": self.artifact_type,
             "config": self.config_layer.to_dict(),
             "layers": [layer.to_dict() for layer in self.layers],
         }
+        if self.annotations:
+            data["annotations"] = self.annotations
+
+        return data
 
     def to_json(self):
-        return json.dumps(self.to_dict())
+        return json.dumps(self.to_dict(), indent=2)
 
     @classmethod
     def from_dict(cls, data):
         artifact_type = data.get("artifactType")
         config_layer = OCIConfigLayer.from_dict(data.get("config"))
         layers = [OCILayer.from_dict(layer) for layer in data.get("layers")]
-        return cls(artifact_type, config_layer, layers)
+        annotations = data.get("annotations")
+        return cls(artifact_type, config_layer, layers, annotations)
 
     @classmethod
     def from_json(cls, data):
@@ -173,9 +182,17 @@ class QuayRegistryClient:
         return response
 
     def ensure_empty_blob(self, namespace, repo_name, grant_token):
-        empty_blob_digest = calculate_sha256_digest(EMPTY_CONFIG_JSON.encode("utf-8"))
-        return self.upload_artifact_blob(
-            namespace, repo_name, EMPTY_CONFIG_JSON.encode("utf-8"), empty_blob_digest, grant_token
+        empty_config_blob_digest = calculate_sha256_digest(EMPTY_CONFIG_JSON.encode("utf-8"))
+        self.upload_artifact_blob(
+            namespace,
+            repo_name,
+            EMPTY_CONFIG_JSON.encode("utf-8"),
+            empty_config_blob_digest,
+            grant_token,
+        )
+        empty_blob_digest = calculate_sha256_digest("".encode("utf-8"))
+        self.upload_artifact_blob(
+            namespace, repo_name, "".encode("utf-8"), empty_blob_digest, grant_token
         )
 
     def list_tags(self, namespace, repo_name, grant_token):
@@ -215,12 +232,11 @@ class QuayRegistryClient:
         }
 
         path = f"/v2/{namespace}/{repo_name}/manifests/{tag}"
+        logger.info(f"🟦 🟦 🟦 🟦  uploading manifest {manifest.to_json()}")
         response = self._do_request("PUT", path, headers=headers, data=manifest.to_json())
         logger.info(f"🟦 🟦 🟦 🟦  manifest upload response {response} {response.data}")
         if response.status_code == 401:
             abort(401, message=response.data)
-        if response.status_code == 201:
-            self.update_repository_kind(namespace, repo_name, self.plugin_name)
 
         return response
 
@@ -259,16 +275,6 @@ class QuayRegistryClient:
             return response
         return response
 
-    def update_repository_kind(self, namespace, repo_name, kind):
-        # get the repository from the database
-        repository = get_repository(namespace, repo_name)
-        if not repository:
-            raise RegistryError(f"Repository {namespace}/{repo_name} not found")
-
-        kind_model = RepositoryKind.get(name=kind)
-        repository.kind = kind_model
-        repository.save()
-
     def get_all_tags(self, namespace, repo_name, grant_token):
         # TODO: handle pagination
         tags_response = self.list_tags(namespace, repo_name, grant_token)
@@ -279,6 +285,28 @@ class QuayRegistryClient:
     def get_blob_url(self, namespace, repo_name, blob_digest):
         return f"{self.scheme}://{self.hostname}/v2/{namespace}/{repo_name}/blobs/{blob_digest}"
 
+    def upload_oci_blob_chunk(
+        self, namespace, repo_name, upload_location, chunk, chunk_offset, grant_token
+    ):
+        chunk_length = len(chunk)
+        content_range = f"{chunk_offset}-{chunk_offset + chunk_length - 1}"
+        headers = {
+            "Content-Range": content_range,
+            "Content-Length": str(chunk_length),
+            "Authorization": f"Bearer {grant_token}",
+        }
+
+        response = self._do_request("PATCH", upload_location, headers=headers, data=chunk)
+        return response
+
+    def finalize_oci_blob_upload(self, namespace, repo_name, upload_location, digest, grant_token):
+        finalize_url = f"{upload_location}?digest={digest}"
+        return self._do_request(
+            "PUT",
+            finalize_url,
+            headers={"Content-Length": "0", "Authorization": f"Bearer {grant_token}"},
+        )
+
 
 def get_blob_data(namespace_name, repo_name, digest, client):
     user = get_authenticated_user()
@@ -288,3 +316,18 @@ def get_blob_data(namespace_name, repo_name, digest, client):
 
     blob = client.get_oci_blob(namespace_name, repo_name, digest, grant_token)
     return blob.data
+
+
+def calc_sha256digest(data, buffer_size=655356):
+    is_data = isinstance(data, bytes)
+    if is_data:
+        data = io.BytesIO(data)
+
+    sha256_hash = hashlib.sha256()  # Create a SHA-256 hash object
+
+    while chunk := data.read(buffer_size):
+        sha256_hash.update(chunk)  # Update the hash with the chunk of data
+
+    digest = f"sha256:{sha256_hash.hexdigest()}"
+    data.seek(0)
+    return digest

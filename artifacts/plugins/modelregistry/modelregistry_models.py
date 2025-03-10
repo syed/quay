@@ -23,8 +23,15 @@ def get_model_metadata(manifest_id):
         return None
 
 
-def save_model_metadata(manifest_id, metadata, git_hash):
-    ModelRegistryMetadata(manifest_id=manifest_id, metadata=metadata, git_hash=git_hash).save()
+def upsert_model_metadata(manifest_id, metadata, git_hash):
+    # check if there's an existing record
+    existing = ModelRegistryMetadata.get_or_none(ModelRegistryMetadata.git_hash == git_hash)
+    if existing:
+        existing.metadata = metadata
+        existing.manifest_id = manifest_id
+        existing.save()
+    else:
+        ModelRegistryMetadata(manifest_id=manifest_id, metadata=metadata, git_hash=git_hash).save()
 
 
 def delete_model_metadata(manifest_id):

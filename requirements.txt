@@ -155,3 +155,7 @@ zipp==3.19.2
 zope.event==5.0
 zope.interface==5.4.0
 pydevd-pycharm~=233.15026.15
+
+
+# Huggingface
+huggingface_hub==0.29.1
