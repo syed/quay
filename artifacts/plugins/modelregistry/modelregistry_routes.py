@@ -95,16 +95,24 @@ def hf_model_info_by_revision(auth_result, namespace, hf_namespace, hf_repo_name
     return jsonify(model_info), 200
 
 
-@bp.route("/<namespace>/<repo>/resolve/<revision>/<path:filename>", methods=["HEAD"])
+@bp.route(
+    "/<namespace>/<hf_namespace>/<hf_repo>/resolve/<revision>/<path:filename>", methods=["HEAD"]
+)
 @validate_plugin_auth(validate_hf_token)
-def head_hf_model_file(auth_result, namespace, repo, revision, filename):
+def head_hf_model_file(auth_result, namespace, hf_namespace, hf_repo, revision, filename):
     tag = revision
-    logger.info(f"🔴🟣🔴🟣🔴🟣 head_hf_model_file {namespace}, {repo}, {tag}, {filename}")
-    token = generate_auth_token_for_read(auth_result, namespace, repo)
-    response = hf_utils.head_model_file(namespace, repo, tag, filename, token)
+    hf_repo = f"{hf_namespace}/{hf_repo}"
+    token = generate_auth_token_for_read(auth_result, namespace, hf_repo)
+    response = hf_utils.head_model_file(namespace, hf_repo, tag, filename, token)
+
+    logger.info(f"🔴🟣🔴🟣🔴🟣 head_hf_model_file {namespace}, {hf_repo}, {tag}, {filename}, {response}")
 
     if not response:
-        abort(404, f"file {filename} not found")
+        return {"error": "manifest not found"}, 404
+
+    logger.info(
+        f"🔴🟣🔴🟣🔴🟣 head_hf_model_file {namespace}, {hf_repo}, {tag}, {filename}, {response.status_code}"
+    )
 
     return response
 

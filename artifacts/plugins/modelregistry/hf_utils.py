@@ -91,11 +91,13 @@ def get_manifest_by_tag_or_git_hash(namespace, repo, revision, token):
     if digest:
         manifest_response = client.get_oci_manifest(namespace, repo, digest, token)
         if manifest_response.status_code != 200:
+            logger.info(f"🔴🟣🔴🟣🔴🟣 manifest not found {namespace}, {repo}, {revision} NONE")
             return None
         manifest = manifest_response.json
         return manifest
 
     manifest_response = client.get_oci_manifest(namespace, repo, revision, token)
+
     if manifest_response.status_code != 200:
         return None
 
@@ -202,7 +204,7 @@ def stream_file_to_registry_and_client(
         nonlocal upload_location
         nonlocal upload_response
         chunk_offset = 0
-        for chunk in response.iter_content(chunk_size=1024):
+        for chunk in response.iter_content(chunk_size=10240):
             sha256_hash.update(chunk)
             upload_response = client.upload_oci_blob_chunk(
                 namespace, hf_repo, upload_location, chunk, chunk_offset, token
@@ -279,6 +281,7 @@ def head_model_file(namespace, repo, tag, filename, token):
     # respond with the headers of the file
     # etag and x-repo-commit
     manifest = get_manifest_by_tag_or_git_hash(namespace, repo, tag, token)
+    logger.info(f"🔴🟣🔴🟣🔴🟣 head_model_file {manifest}")
     if not manifest:
         return None
 
