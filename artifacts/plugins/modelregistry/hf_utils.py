@@ -65,6 +65,8 @@ def validate_hf_token():
     eg: Authorization: Bearer username=admin, password=secret
     """
     auth = request.authorization
+    logger.info(f"🔴🟣🔴🟣🔴🟣 auth {auth}, username: {auth.username}, password: {auth.password}")
+
     if not auth:
         # could be anonymous
         return ValidateResult(AuthKind.credentials, missing=True)
@@ -413,7 +415,7 @@ def build_empty_manifest(git_sha, file_mdata: list[FileInfo]):
             OCILayer(
                 media_type="application/vnd.oci.image.layer.v1.tar",
                 digest=EMPTY_LAYER_HASH,
-                length=0,
+                size=0,
                 annotations={
                     "filename": mdata.filename,
                     "git-hash": mdata.git_sha,
