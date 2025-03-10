@@ -65,11 +65,12 @@ def validate_hf_token():
     eg: Authorization: Bearer username=admin, password=secret
     """
     auth = request.authorization
-    logger.info(f"🔴🟣🔴🟣🔴🟣 auth {auth}, username: {auth.username}, password: {auth.password}")
 
     if not auth:
         # could be anonymous
         return ValidateResult(AuthKind.credentials, missing=True)
+
+    logger.info(f"🔴🟣🔴🟣🔴🟣 auth {auth}, username: {auth.username}, password: {auth.password}")
     username = auth.parameters.get("username")
     password = auth.parameters.get("password")
 
@@ -204,7 +205,7 @@ def stream_file_to_registry_and_client(
         nonlocal upload_location
         nonlocal upload_response
         chunk_offset = 0
-        for chunk in response.iter_content(chunk_size=10240):
+        for chunk in response.iter_content(chunk_size=102400):
             sha256_hash.update(chunk)
             upload_response = client.upload_oci_blob_chunk(
                 namespace, hf_repo, upload_location, chunk, chunk_offset, token
