@@ -161,9 +161,7 @@ class RepositoryList(ApiResource):
 
             # Verify that the repository name is valid.
             if features.EXTENDED_REPOSITORY_NAMES:
-                valid_repository_name = REPOSITORY_NAME_EXTENDED_REGEX.match(
-                    repository_name, re.IGNORECASE
-                )
+                valid_repository_name = REPOSITORY_NAME_EXTENDED_REGEX.match(repository_name)
             else:
                 valid_repository_name = REPOSITORY_NAME_REGEX.match(repository_name)
 

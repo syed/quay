@@ -9,7 +9,7 @@ from text_unidecode import unidecode
 REPOSITORY_NAME_REGEX = re.compile(r"^[a-z0-9][\.a-z0-9_-]{0,254}$")
 # Extended repostitory name regex: allows "/" in repo names
 REPOSITORY_NAME_EXTENDED_REGEX = re.compile(
-    r"^(?=.{0,255}$)[a-z0-9][\.a-z0-9_-]*(?:\/[a-z0-9][\.a-z0-9_-]*)*$"
+    r"^(?=.{0,255}$)[a-z0-9][\.a-z0-9_-]*(?:\/[a-z0-9][\.a-z0-9_-]*)*$", re.IGNORECASE
 )
 VALID_TAG_PATTERN = r"[\w][\w.-]{0,127}"
 FULL_TAG_PATTERN = r"^[\w][\w.-]{0,127}$"
