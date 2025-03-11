@@ -3,6 +3,7 @@ List, create and manage repositories.
 """
 
 import logging
+import re
 from collections import defaultdict
 from datetime import datetime, timedelta
 
@@ -160,7 +161,9 @@ class RepositoryList(ApiResource):
 
             # Verify that the repository name is valid.
             if features.EXTENDED_REPOSITORY_NAMES:
-                valid_repository_name = REPOSITORY_NAME_EXTENDED_REGEX.match(repository_name)
+                valid_repository_name = REPOSITORY_NAME_EXTENDED_REGEX.match(
+                    repository_name, re.IGNORECASE
+                )
             else:
                 valid_repository_name = REPOSITORY_NAME_REGEX.match(repository_name)
 
