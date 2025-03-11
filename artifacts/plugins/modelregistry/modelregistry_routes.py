@@ -102,7 +102,7 @@ def hf_model_info_by_revision(auth_result, namespace, hf_namespace, hf_repo_name
 def head_hf_model_file(auth_result, namespace, hf_namespace, hf_repo, revision, filename):
     tag = revision
     hf_repo = f"{hf_namespace}/{hf_repo}"
-    token = generate_auth_token_for_read(auth_result, namespace, hf_repo)
+    token = generate_auth_token_for_write(auth_result, namespace, hf_repo)
     response = hf_utils.head_model_file(namespace, hf_repo, tag, filename, token)
 
     logger.info(f"🔴🟣🔴🟣🔴🟣 head_hf_model_file {namespace}, {hf_repo}, {tag}, {filename}, {response}")
