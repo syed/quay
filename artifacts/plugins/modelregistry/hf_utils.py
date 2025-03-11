@@ -205,7 +205,7 @@ def stream_file_to_registry_and_client(
         nonlocal upload_location
         nonlocal upload_response
         chunk_offset = 0
-        for chunk in response.iter_content(chunk_size=102400):
+        for chunk in response.iter_content(chunk_size=10240000):
             sha256_hash.update(chunk)
             upload_response = client.upload_oci_blob_chunk(
                 namespace, hf_repo, upload_location, chunk, chunk_offset, token
