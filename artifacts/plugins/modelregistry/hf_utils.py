@@ -130,7 +130,7 @@ def get_model_file(namespace, hf_repo, revision, filename, token):
     # fetch the layer which has the filename
     manifest_json = get_manifest_by_tag_or_git_hash(namespace, hf_repo, revision, token)
     if not manifest_json:
-        return None
+        return Response(status=404, response="manifest not found")
 
     manifest = OCIArtifactManifest.from_dict(manifest_json)
     manifest_git_hash = manifest_json.get("annotations", {}).get("git-hash")
@@ -154,7 +154,7 @@ def get_model_file(namespace, hf_repo, revision, filename, token):
                 token,
             )
 
-    return None
+    return Response(status=404, response="file not found")
 
 
 class ModelRegistryException(Exception):
