@@ -99,6 +99,7 @@ def hf_model_info_by_revision(auth_result, namespace, hf_namespace, hf_repo_name
     "/<namespace>/<hf_namespace>/<hf_repo>/resolve/<revision>/<path:filename>", methods=["HEAD"]
 )
 @validate_plugin_auth(validate_hf_token)
+@check_proxy_cache_revision
 def head_hf_model_file(auth_result, namespace, hf_namespace, hf_repo, revision, filename):
     tag = revision
     hf_repo = f"{hf_namespace}/{hf_repo}"
@@ -126,6 +127,7 @@ def head_hf_model_file(auth_result, namespace, hf_namespace, hf_repo, revision, 
 
 
 @bp.route("/<namespace>/<hf_namespace>/<hf_repo_name>/resolve/<revision>/<path:filename>")
+@check_proxy_cache_revision
 @validate_plugin_auth(validate_hf_token)
 def fetch_hf_model_file(auth_result, namespace, hf_namespace, hf_repo_name, revision, filename):
     hf_repo = f"{hf_namespace}/{hf_repo_name}"
