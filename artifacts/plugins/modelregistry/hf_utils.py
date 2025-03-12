@@ -53,7 +53,6 @@ def get_revision_sha_from_manifest(namespace, hf_repo, revision, token):
     # stored as an annotation
 
     repo = hf_repo.lower()
-    client = QuayRegistryClient(PLUGIN_NAME)
     manifest_response = client.get_oci_manifest(namespace, repo, revision, token)
     manifest = manifest_response.json
     return manifest.get("annotations", {}).get("git-hash")
@@ -91,7 +90,6 @@ def get_manifest_by_tag_or_git_hash(namespace, hf_repo, revision, token):
 
     repo = hf_repo.lower()
 
-    client = QuayRegistryClient(PLUGIN_NAME)
     digest = get_manifest_sha_for_git_hash(revision)
     if digest:
         manifest_response = client.get_oci_manifest(namespace, repo, digest, token)
@@ -114,7 +112,6 @@ def get_model_filenames(namespace, repo, tag, token):
     # Pull the manifest
     # and return the siblings of the model which is
 
-    client = QuayRegistryClient(PLUGIN_NAME)
     manifest = get_manifest_by_tag_or_git_hash(namespace, repo, tag, token)
 
     if not manifest:
@@ -173,7 +170,7 @@ def update_manifest_with_layer_and_retag(
     layer.size = final_size
 
     # update manifest and tag
-    response = client.upload_oci_artifact_manifest(namespace, hf_repo, manifest, tag, token)
+    response = client.upload_oci_artifact_manifest(namespace, hf_repo.lower(), manifest, tag, token)
     if response.status_code != 201:
         raise ModelRegistryException("manifest update failed")
 
@@ -187,7 +184,7 @@ def stream_file_to_registry_and_client(
     """
 
     layer = manifest.layers[layer_idx]
-    upload_response = client.start_upload_blob(namespace, hf_repo, token)
+    upload_response = client.start_upload_blob(namespace, hf_repo.lower(), token)
     upload_location = upload_response.headers.get("Location")
     logger.info(f"🔴🟣🔴🟣🔴🟣 upload location {upload_location}")
     if not upload_location:
@@ -212,7 +209,7 @@ def stream_file_to_registry_and_client(
         for chunk in response.iter_content(chunk_size=10240000):
             sha256_hash.update(chunk)
             upload_response = client.upload_oci_blob_chunk(
-                namespace, hf_repo, upload_location, chunk, chunk_offset, token
+                namespace, hf_repo.lower(), upload_location, chunk, chunk_offset, token
             )
 
             upload_location = upload_response.headers.get("Location")
@@ -225,7 +222,7 @@ def stream_file_to_registry_and_client(
         # upload complete, finalize the blob
         final_digest = f"sha256:{sha256_hash.hexdigest()}"
         final_response = client.finalize_oci_blob_upload(
-            namespace, hf_repo, upload_location, final_digest, token
+            namespace, hf_repo.lower(), upload_location, final_digest, token
         )
         logger.info(
             f"🔴🟣🔴🟣🔴🟣 finalize upload {final_response.status_code} {final_response.headers.get('Location')}"
@@ -266,7 +263,9 @@ def download_file(
             token,
         )
     else:
-        resp = client.get_oci_blob(namespace, hf_repo, layer.digest, token, follow_cdn=False)
+        resp = client.get_oci_blob(
+            namespace, hf_repo.lower(), layer.digest, token, follow_cdn=False
+        )
         logger.info(f"🔴🟣🔴🟣🔴🟣 fetching blob {layer.digest} resp: {resp.status_code} {resp.headers}")
         headers = {
             "etag": f'"{file_git_hash}"',
