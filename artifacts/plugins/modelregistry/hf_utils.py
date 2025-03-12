@@ -81,12 +81,15 @@ def validate_hf_token():
     return auth_result.with_kind(AuthKind.credentials)
 
 
-def get_manifest_by_tag_or_git_hash(namespace, repo, revision, token):
+def get_manifest_by_tag_or_git_hash(namespace, hf_repo, revision, token):
     # Pull the manifest
     # revision can be a tag or a commit hash
     # check if it is a git hash
     # if it is a git hash, get the manifest sha
     # and then pull the manifest
+
+    repo = hf_repo.lower()
+
     client = QuayRegistryClient(PLUGIN_NAME)
     digest = get_manifest_sha_for_git_hash(revision)
     if digest:
@@ -389,7 +392,8 @@ def get_revision_sha_from_huggingface(hf_repo, revision):
 
 
 def push_manifest_to_registry(namespace, hf_repo, manifest, tag, token):
-    client.upload_oci_artifact_manifest(namespace, hf_repo, manifest, tag, token)
+    repo = hf_repo.lower()
+    client.upload_oci_artifact_manifest(namespace, repo, manifest, tag, token)
 
 
 def update_registry_manifest_from_hf(namespace, hf_repo, revision, token):
