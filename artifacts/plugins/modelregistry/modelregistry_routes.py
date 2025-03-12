@@ -73,7 +73,7 @@ def hf_model_info_by_revision(auth_result, namespace, hf_namespace, hf_repo_name
     # revision can be a tag or a commit hash
     # try with tag first
     hf_repo = f"{hf_namespace}/{hf_repo_name}"
-    token = generate_auth_token_for_read(auth_result, namespace, hf_repo)
+    token = generate_auth_token_for_read(auth_result, namespace, hf_repo.lower())
     revision_sha = hf_utils.get_revision_sha_from_manifest(namespace, hf_repo, revision, token)
 
     logger.info(
@@ -104,7 +104,7 @@ def hf_model_info_by_revision(auth_result, namespace, hf_namespace, hf_repo_name
 def head_hf_model_file(auth_result, namespace, hf_namespace, hf_repo_name, revision, filename):
     tag = revision
     hf_repo = f"{hf_namespace}/{hf_repo_name}"
-    token = generate_auth_token_for_write(auth_result, namespace, hf_repo)
+    token = generate_auth_token_for_write(auth_result, namespace, hf_repo.lower())
     response = hf_utils.head_model_file(namespace, hf_repo, tag, filename, token)
 
     logger.info(f"🔴🟣🔴🟣🔴🟣 head_hf_model_file {namespace}, {hf_repo}, {tag}, {filename}, {response}")
@@ -132,7 +132,7 @@ def head_hf_model_file(auth_result, namespace, hf_namespace, hf_repo_name, revis
 @check_proxy_cache_revision
 def fetch_hf_model_file(auth_result, namespace, hf_namespace, hf_repo_name, revision, filename):
     hf_repo = f"{hf_namespace}/{hf_repo_name}"
-    token = generate_auth_token_for_write(auth_result, namespace, hf_repo)
+    token = generate_auth_token_for_write(auth_result, namespace, hf_repo.lower())
     return hf_utils.get_model_file(namespace, hf_repo, revision, filename, token)
 
 

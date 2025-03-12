@@ -47,11 +47,12 @@ EMPTY_LAYER_HASH = "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca4959
 FileInfo = namedtuple("FileInfo", ["filename", "git_sha", "uncompressed_size"])
 
 
-def get_revision_sha_from_manifest(namespace, repo, revision, token):
+def get_revision_sha_from_manifest(namespace, hf_repo, revision, token):
     # Pull the manifest
     # and return the sha of the model which is
     # stored as an annotation
 
+    repo = hf_repo.lower()
     client = QuayRegistryClient(PLUGIN_NAME)
     manifest_response = client.get_oci_manifest(namespace, repo, revision, token)
     manifest = manifest_response.json
@@ -464,7 +465,7 @@ def check_proxy_cache_revision(func):
         if app.config.get("FEATURE_PROXY_CACHE") and has_proxy_cache(namespace):
             # check if upstream has changed, and if so, download and update the upstream model
             hf_repo = f"{hf_namespace}/{hf_repo_name}"
-            token = generate_auth_token_for_write(auth_result, namespace, hf_repo)
+            token = generate_auth_token_for_write(auth_result, namespace, hf_repo.lower())
             hf_sha = get_revision_sha_from_huggingface(hf_repo, revision)
             logger.info(
                 f"🔴🟣🔴🟣🔴🟣 checking for cache in {namespace}, {hf_repo}, {revision}, "
