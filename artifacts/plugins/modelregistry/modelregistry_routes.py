@@ -96,13 +96,14 @@ def hf_model_info_by_revision(auth_result, namespace, hf_namespace, hf_repo_name
 
 
 @bp.route(
-    "/<namespace>/<hf_namespace>/<hf_repo>/resolve/<revision>/<path:filename>", methods=["HEAD"]
+    "/<namespace>/<hf_namespace>/<hf_repo_name>/resolve/<revision>/<path:filename>",
+    methods=["HEAD"],
 )
 @validate_plugin_auth(validate_hf_token)
 @check_proxy_cache_revision
-def head_hf_model_file(auth_result, namespace, hf_namespace, hf_repo, revision, filename):
+def head_hf_model_file(auth_result, namespace, hf_namespace, hf_repo_name, revision, filename):
     tag = revision
-    hf_repo = f"{hf_namespace}/{hf_repo}"
+    hf_repo = f"{hf_namespace}/{hf_repo_name}"
     token = generate_auth_token_for_write(auth_result, namespace, hf_repo)
     response = hf_utils.head_model_file(namespace, hf_repo, tag, filename, token)
 
@@ -127,8 +128,8 @@ def head_hf_model_file(auth_result, namespace, hf_namespace, hf_repo, revision, 
 
 
 @bp.route("/<namespace>/<hf_namespace>/<hf_repo_name>/resolve/<revision>/<path:filename>")
-@check_proxy_cache_revision
 @validate_plugin_auth(validate_hf_token)
+@check_proxy_cache_revision
 def fetch_hf_model_file(auth_result, namespace, hf_namespace, hf_repo_name, revision, filename):
     hf_repo = f"{hf_namespace}/{hf_repo_name}"
     token = generate_auth_token_for_write(auth_result, namespace, hf_repo)
