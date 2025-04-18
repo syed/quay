@@ -154,7 +154,7 @@ class ReadReplicaSupportedModel(Model):
 
         query._database = cls._select_database(can_use_read_replica)
         logger.warning(
-            f"🟡🟡🟡🟡 query = {query} WILL RUN ON DB {dir(query._database.obj.database)} CONNECT PARAMS {dir(query._database.connect_params)}  \n CONNECTION : {dir(query._database.connection)} 🟡🟡"
+            f"🟡🟡🟡🟡 query = {query} WILL RUN ON DB {query._database.obj.database} CONNECT PARAMS {query._database.connect_params} 🟡🟡"
         )
         return query
 
