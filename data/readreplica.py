@@ -144,12 +144,15 @@ class ReadReplicaSupportedModel(Model):
         cls: Type[TReadReplicaSupportedModel], *args, **kwargs: Any
     ) -> ModelSelect[TReadReplicaSupportedModel]:
 
+        logger.warning(f"🟡🟡🟡🟡{cls.__name__} select called with args: {args}, kwargs: {kwargs} 🟡🟡")
         can_use_read_replica = None
         if "can_use_read_replica" in kwargs:
             can_use_read_replica = kwargs.get("can_use_read_replica")
             del kwargs["can_use_read_replica"]
 
         query = super(ReadReplicaSupportedModel, cls).select(*args, **kwargs)
+
+        logger.warning(f"🟡🟡🟡🟡 query = {query._sql} 🟡🟡")
         query._database = cls._select_database(can_use_read_replica)
         return query
 
