@@ -177,7 +177,7 @@ def add_prototype_permission(
 
 def get_org_wide_permissions(user, org_filter=None):
     Org = User.alias()
-    team_with_role = Team.select(Team, Org, TeamRole).join(TeamRole)
+    team_with_role = Team.select(Team, Org, TeamRole, can_use_read_replica=True).join(TeamRole)
     with_org = team_with_role.switch(Team).join(Org, on=(Team.organization == Org.id))
     with_user = with_org.switch(Team).join(TeamMember).join(User)
 
