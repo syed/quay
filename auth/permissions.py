@@ -179,6 +179,13 @@ class QuayDeferredPermissionUser(Identity):
         Populates the repository-specific provides for a particular user and repository.
         """
 
+        logger.warning(
+            "🟣🔴🟣🔴Populating repository provides for user: %s, namespace: %s, repo: %s",
+            user_object.username,
+            namespace_filter,
+            repository_name,
+        )
+
         if namespace_filter and repository_name:
             permissions = model.permission.get_user_repository_permissions(
                 user_object, namespace_filter, repository_name
