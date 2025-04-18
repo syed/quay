@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import random
 import traceback
 from collections import namedtuple
@@ -154,10 +155,11 @@ class ReadReplicaSupportedModel(Model):
         query = super(ReadReplicaSupportedModel, cls).select(*args, **kwargs)
 
         query._database = cls._select_database(can_use_read_replica)
-        logger.warning(f"🟡🟡🟡🟡 query = {query}  {query._database.connect_params.get('host')} 🟡🟡")
         stack = traceback.extract_stack()[:-1]
+        logger.warning(f"🟡🟡🟡🟡 query = {query}  {query._database.connect_params.get('host')} 🟡🟡")
         for filename, lineno, func, text in stack:
-            logger.warning(f"{filename}:{lineno} in {func} -> {text}")
+            fname = os.path.basename(filename)
+            logger.warning(f"🟡 {fname}:{lineno} in {func} -> {text}")
 
         return query
 
