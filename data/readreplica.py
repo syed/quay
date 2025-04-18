@@ -153,7 +153,7 @@ class ReadReplicaSupportedModel(Model):
         query = super(ReadReplicaSupportedModel, cls).select(*args, **kwargs)
 
         query._database = cls._select_database(can_use_read_replica)
-        logger.warning(f"🟡🟡🟡🟡 query = {query} WILL RUN ON DB {query._database._primary_db} 🟡🟡")
+        logger.warning(f"🟡🟡🟡🟡 query = {query} WILL RUN ON DB {query._database.database} 🟡🟡")
         return query
 
     @classmethod
