@@ -1,3 +1,6 @@
+import inspect
+import logging
+
 from peewee import JOIN
 
 from data.database import (
@@ -14,6 +17,17 @@ from data.database import (
 )
 from data.model import DataModelException, _basequery
 from util.names import parse_robot_username
+
+logger = logging.getLogger(__name__)
+
+
+def log_stack(limit=None):
+    stack = inspect.stack()
+    for frame_info in stack[1 : limit + 1 if limit else None]:  # Skip current function
+        func_name = frame_info.function
+        line_no = frame_info.lineno
+        code_line = frame_info.code_context[0].strip() if frame_info.code_context else ""
+        logger.warning(f"🔴🔴{func_name} - line {line_no}: {code_line}")
 
 
 def list_team_permissions(team):
@@ -74,6 +88,8 @@ def _get_user_repo_permissions(
     user, limit_to_repository_obj=None, limit_namespace=None, limit_repo_name=None
 ):
     UserThroughTeam = User.alias()
+
+    log_stack()
 
     base_query = (
         RepositoryPermission.select(
