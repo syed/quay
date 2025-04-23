@@ -89,6 +89,7 @@ def _get_user_repo_permissions(
 ):
     UserThroughTeam = User.alias()
 
+    print("🔴🔴🔴🔴 PERMISSIONS CHECK 🔴🔴🔴🔴")
     log_stack()
 
     base_query = (
