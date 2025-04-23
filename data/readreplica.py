@@ -146,7 +146,7 @@ class ReadReplicaSupportedModel(Model):
         cls: Type[TReadReplicaSupportedModel], *args, **kwargs: Any
     ) -> ModelSelect[TReadReplicaSupportedModel]:
 
-        # logger.warning(f"🟡🟡{cls.__name__} select called with args: {args}, kwargs: {kwargs} 🟡🟡")
+        logger.warning(f"🟡🟡{cls.__name__} select called with args: {args}, kwargs: {kwargs} 🟡🟡")
         can_use_read_replica = None
         if "can_use_read_replica" in kwargs:
             can_use_read_replica = kwargs.get("can_use_read_replica")
@@ -156,10 +156,10 @@ class ReadReplicaSupportedModel(Model):
 
         query._database = cls._select_database(can_use_read_replica)
         stack = traceback.extract_stack()[:-1]
-        # logger.warning(f"🟡 query = {query}  {query._database.connect_params.get('host')} 🟡")
-        # for filename, lineno, func, text in stack:
-        #    fname = os.path.basename(filename)
-        # logger.warning(f"🟡{fname}:{lineno} in {func} -> {text} 🟡")
+        logger.warning(f"🟡 query = {query}  {query._database.connect_params.get('host')} 🟡")
+        for filename, lineno, func, text in stack:
+            fname = os.path.basename(filename)
+            logger.warning(f"🟡{fname}:{lineno} in {func} -> {text} 🟡")
 
         return query
 
