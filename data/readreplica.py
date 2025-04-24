@@ -8,7 +8,14 @@ from collections import namedtuple
 from contextlib import contextmanager
 from typing import Any, Type, TypeVar
 
-from peewee import SENTINEL, Model, ModelSelect, OperationalError, Proxy
+from peewee import (
+    SENTINEL,
+    Model,
+    ModelCompoundSelectQuery,
+    ModelSelect,
+    OperationalError,
+    Proxy,
+)
 
 from data.decorators import is_deprecated_model
 
@@ -81,7 +88,7 @@ class AutomaticFailoverWrapper(object):
                     raise
 
 
-class ReadReplicaSupportedModel(Model):
+class ReadReplicaSupportedModel(Model, ModelCompoundSelectQuery):
     """
     Base model for peewee data models that support using a read replica for SELECT requests not
     under transactions, and automatic failover to the master if the read replica fails.
@@ -156,7 +163,7 @@ class ReadReplicaSupportedModel(Model):
 
         query._database = cls._select_database(can_use_read_replica)
         stack = traceback.extract_stack()[:-1]
-        logger.warning(f"🟡 query = {query}  {query._database.connect_params.get('host')} 🟡")
+        logger.warning(f"🟡 query = {query}  DB : {query._database.connect_params.get('host')} 🟡")
         for filename, lineno, func, text in stack:
             fname = os.path.basename(filename)
             logger.warning(f"🟡{fname}:{lineno} in {func} -> {text} 🟡")
@@ -219,3 +226,7 @@ class ReadReplicaSupportedModel(Model):
                 raise Exception("Attempt to write to deprecated model %s" % cls)
 
         return query
+
+    def union(self, rhs):
+        logger.warning(f"🟡🟡{self.__class__.__name__} UNION called with rhs: {rhs} 🟡🟡")
+        return super(ReadReplicaSupportedModel, self).union(rhs)
