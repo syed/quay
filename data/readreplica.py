@@ -88,7 +88,7 @@ class AutomaticFailoverWrapper(object):
                     raise
 
 
-class ReadReplicaSupportedModel(Model, ModelCompoundSelectQuery):
+class ReadReplicaSupportedModel(Model):
     """
     Base model for peewee data models that support using a read replica for SELECT requests not
     under transactions, and automatic failover to the master if the read replica fails.
