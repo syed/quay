@@ -227,6 +227,7 @@ class ReadReplicaSupportedModel(Model, ModelCompoundSelectQuery):
 
         return query
 
-    def union(self, rhs):
-        logger.warning(f"🟡🟡{self.__class__.__name__} UNION called with rhs: {rhs} 🟡🟡")
-        return super(ReadReplicaSupportedModel, self).union(rhs)
+    @classmethod
+    def union(cls, rhs):
+        logger.warning(f"🟡🟡{cls.__class__.__name__} UNION called with rhs: {rhs} 🟡🟡")
+        return super(ReadReplicaSupportedModel, cls).union(rhs)
