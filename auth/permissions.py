@@ -193,6 +193,7 @@ class QuayDeferredPermissionUser(Identity):
         else:
             permissions = model.permission.get_all_user_repository_permissions(user_object)
 
+        logger.warning(f"🟣🔴🟣🔴GOT Permissions: {permissions}")
         for perm in permissions:
             repo_grant = _RepositoryNeed(
                 perm.repository.namespace_user.username,

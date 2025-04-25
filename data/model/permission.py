@@ -89,7 +89,9 @@ def _get_user_repo_permissions(
 ):
     UserThroughTeam = User.alias()
 
-    print("🔴🔴🔴🔴 PERMISSIONS CHECK 🔴🔴🔴🔴")
+    logger.warning(
+        f"🔴🔴🔴🔴 PERMISSIONS CHECK user:{user}, ns:{limit_namespace} repo:{limit_repo_name} repo_obj:{limit_to_repository_obj} 🔴🔴🔴🔴"
+    )
     log_stack()
 
     base_query = (
