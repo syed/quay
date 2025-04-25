@@ -122,14 +122,14 @@ def _get_user_repo_permissions(
         .where(UserThroughTeam.id == user)
     )
 
-    results = []
-    for r in direct:
-        results.append(r)
+    result = []
+    for perm in direct:
+        result.append(perm)
 
-    for r in team:
-        results.append(r)
+    for perm in team:
+        result.append(perm)
 
-    return results
+    return result
 
 
 def delete_prototype_permission(org, uid):
