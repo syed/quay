@@ -200,8 +200,8 @@ class OrganizationList(ApiResource):
             )
             log_action(
                 "org_create",
-                org_data["name"],
-                {"email": org_data.get("email"), "namespace": org_data["name"]},
+                user_or_orgname=None,
+                metadata={"email": org_data.get("email"), "namespace": org_data["name"]},
             )
             return "Created", 201
         except model.DataModelException as ex:
