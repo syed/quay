@@ -396,11 +396,21 @@ class ObservableDatabase(object):
     def connect(self, reuse_if_open=False):
         ret = super(ObservableDatabase, self).connect(reuse_if_open)
         db_connect_calls.inc()
+        logger.info(
+            "Database connection opened - database: %s, host: %s",
+            getattr(self, "database", "unknown"),
+            getattr(self, "host", "unknown"),
+        )
         return ret
 
     def close(self):
         ret = super(ObservableDatabase, self).close()
         db_close_calls.inc()
+        logger.info(
+            "Database connection closed - database: %s, host: %s",
+            getattr(self, "database", "unknown"),
+            getattr(self, "host", "unknown"),
+        )
         return ret
 
 
@@ -411,12 +421,26 @@ class ObservablePooledDatabase(ObservableDatabase):
         ret = super(ObservablePooledDatabase, self).connect(reuse_if_open)
         db_pooled_connections_in_use.set(len(self._in_use))
         db_pooled_connections_available.set(len(self._connections))
+        logger.info(
+            "Database pooled connection opened - database: %s, host: %s, connections_in_use: %d, connections_available: %d",
+            getattr(self, "database", "unknown"),
+            getattr(self, "host", "unknown"),
+            len(self._in_use),
+            len(self._connections),
+        )
         return ret
 
     def close(self):
         ret = super(ObservablePooledDatabase, self).close()
         db_pooled_connections_in_use.set(len(self._in_use))
         db_pooled_connections_available.set(len(self._connections))
+        logger.info(
+            "Database pooled connection closed - database: %s, host: %s, connections_in_use: %d, connections_available: %d",
+            getattr(self, "database", "unknown"),
+            getattr(self, "host", "unknown"),
+            len(self._in_use),
+            len(self._connections),
+        )
         return ret
 
 
@@ -581,13 +605,21 @@ get_epoch_timestamp_ms = lambda: int(time.time() * 1000)
 
 def close_db_filter(_):
     if db.obj is not None and not db.is_closed():
-        logger.debug("Disconnecting from database.")
+        logger.info(
+            "Disconnecting from main database - database: %s, host: %s",
+            getattr(db.obj, "database", "unknown"),
+            getattr(db.obj, "host", "unknown"),
+        )
         db.close()
 
     if read_only_config.obj is not None:
         for read_replica in read_only_config.obj.read_replicas:
             if not read_replica.is_closed():
-                logger.debug("Disconnecting from read replica.")
+                logger.info(
+                    "Disconnecting from read replica - database: %s, host: %s",
+                    getattr(read_replica, "database", "unknown"),
+                    getattr(read_replica, "host", "unknown"),
+                )
                 read_replica.close()
 
 
