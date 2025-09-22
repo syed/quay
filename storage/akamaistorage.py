@@ -1,5 +1,6 @@
 import logging
 import urllib.parse
+from datetime import datetime
 
 # ignoring the below type check as mypy fails with "missing library stubs or py.typed marker" error
 from akamai.edgeauth import EdgeAuth, EdgeAuthError  # type: ignore
@@ -38,7 +39,8 @@ class AkamaiS3Storage(S3Storage):
         self.et = EdgeAuth(
             token_name=TOKEN_QUERY_STRING,
             key=self.akamai_shared_secret,
-            window_seconds=DEFAULT_SIGNED_URL_EXPIRY_SECONDS,
+            start_time=int(datetime(2025, 1, 1, 0, 0, 0).timestamp()),
+            end_time=int(datetime(2026, 1, 1, 0, 15, 0).timestamp()),
             escape_early=True,
         )
 
