@@ -86,8 +86,11 @@ class AkamaiS3Storage(S3Storage):
                     )
 
             to_sign = f"{akamai_url_parsed.path}"
+            token = self.et.generate_url_token(to_sign)
+
+            logger.info(f" 🟠🟠🟠🟠 to_sign: {to_sign}, token={token}")
             akamai_url_parsed = akamai_url_parsed._replace(
-                query=f"{akamai_url_parsed.query}&{TOKEN_QUERY_STRING}={self.et.generate_url_token(to_sign)}"
+                query=f"{akamai_url_parsed.query}&{TOKEN_QUERY_STRING}={token}"
             )
 
         except EdgeAuthError as e:
